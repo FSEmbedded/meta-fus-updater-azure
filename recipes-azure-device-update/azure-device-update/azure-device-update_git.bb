@@ -26,13 +26,13 @@ EXTRA_OECMAKE += "-DADUC_WARNINGS_AS_ERRORS=OFF"
 # Build the non-simulator (real) version of the client.
 EXTRA_OECMAKE += "-DADUC_PLATFORM_LAYER=linux"
 # Integrate with SWUpdate as the installer
-EXTRA_OECMAKE += "-DADUC_CONTENT_HANDLERS=microsoft/swupdate"
 # Set the path to the manufacturer file
 EXTRA_OECMAKE += "-DADUC_MANUFACTURER_FILE=${sysconfdir}/adu-manufacturer"
 # Set the path to the model file
 EXTRA_OECMAKE += "-DADUC_MODEL_FILE=${sysconfdir}/adu-model"
 # Set the path to the version file
 EXTRA_OECMAKE += "-DADUC_VERSION_FILE=${sysconfdir}/adu-version"
+EXTRA_OECMAKE += "-DADUC_CONTENT_HANDLERS=fus/fsupdate"
 # Use zlog as the logging library.
 EXTRA_OECMAKE += "-DADUC_LOGGING_LIBRARY=zlog"
 # Change the log directory.
