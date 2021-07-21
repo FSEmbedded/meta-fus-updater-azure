@@ -101,6 +101,10 @@ do_install_append() {
     chmod 0774 ${D}${ADUC_LOG_DIR}
 
 
+    # Use only until FS-Update implements the run as root function
+    # Then the workflow is seperatet like it was intended by MS
+    # set SUID for AducIotAgent
+    chmod u+s ${D}${bindir}/AducIotAgent
 }
 
 FILES_${PN} += "${bindir}/AducIotAgent"
