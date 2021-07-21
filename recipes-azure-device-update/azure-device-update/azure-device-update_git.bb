@@ -11,22 +11,8 @@
 
 LICENSE = "CLOSED"
 
-ADUC_GIT_BRANCH ?= "master"
-ADUC_SRC_URI ?= "git://github.com/Azure/adu-private-preview;branch=${ADUC_GIT_BRANCH}"
-SRC_URI = "${ADUC_SRC_URI}"
-
-# This code handles setting variables for either git or for a local file.
-# This is only while we are using private repos, once our repos are public,
-# we will just use git.
-python () {
-    src_uri = d.getVar('ADUC_SRC_URI')
-    if src_uri.startswith('git'):
-        d.setVar('SRCREV', d.getVar('AUTOREV'))
-        d.setVar('PV', '1.0+git' + d.getVar('SRCPV'))
-        d.setVar('S', d.getVar('WORKDIR') + "/git")
-    elif src_uri.startswith('file'):
-        d.setVar('S',  d.getVar('WORKDIR') + "/adu-linux-client")
-}
+SRC_URI = "file://fus-device-update-Y2021.07.tar.bz2"
+S = "${WORKDIR}/fus-device-update"
 
 # ADUC depends on azure-iot-sdk-c and DO Agent SDK
 DEPENDS = "azure-iot-sdk-c deliveryoptimization-agent curl deliveryoptimization-sdk"
