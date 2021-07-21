@@ -25,14 +25,16 @@ EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 EXTRA_OECMAKE += "-DADUC_WARNINGS_AS_ERRORS=OFF"
 # Build the non-simulator (real) version of the client.
 EXTRA_OECMAKE += "-DADUC_PLATFORM_LAYER=linux"
-# Integrate with SWUpdate as the installer
 # Set the path to the manufacturer file
 EXTRA_OECMAKE += "-DADUC_MANUFACTURER_FILE=${sysconfdir}/adu-manufacturer"
 # Set the path to the model file
 EXTRA_OECMAKE += "-DADUC_MODEL_FILE=${sysconfdir}/adu-model"
-# Set the path to the version file
-EXTRA_OECMAKE += "-DADUC_VERSION_FILE=${sysconfdir}/adu-version"
+# Integrate with FS-Update as the installer
 EXTRA_OECMAKE += "-DADUC_CONTENT_HANDLERS=fus/fsupdate"
+# Set the path to the adu version file
+EXTRA_OECMAKE += "-DFIRMWARE_VERSION_FILE=${sysconfdir}/fw_version"
+# Set the path to the app version file
+EXTRA_OECMAKE += "-DAPP_VERSION_FILE=/rw_fs/root/application/current/etc/app_version"
 # Use zlog as the logging library.
 EXTRA_OECMAKE += "-DADUC_LOGGING_LIBRARY=zlog"
 # Change the log directory.
@@ -84,22 +86,22 @@ USERADD_PARAM_${PN}-adu = "\
     --uid 800 --system -g ${ADUGROUP} --home-dir /home/${ADUUSER} --no-create-home --shell /bin/false ${ADUUSER} ; \
     --uid 801 --system -g ${DOGROUP} -G ${ADUGROUP} --home-dir /home/${DOUSER} --no-create-home --shell /bin/false ${DOUSER} ; \
     "
+
 do_install_append() {
-    #create ADUC_DATA_DIR
+    # create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}
     chgrp ${ADUGROUP} ${D}${ADUC_DATA_DIR}
     chmod 0770 ${D}${ADUC_DATA_DIR}
 
-    #create ADUC_CONF_DIR
+    # create ADUC_CONF_DIR
     install -d ${D}${ADUC_CONF_DIR}
     chgrp ${ADUGROUP} ${D}${ADUC_CONF_DIR}
     chmod 0774 ${D}${ADUC_CONF_DIR}
 
-    #create ADUC_LOG_DIR
+    # create ADUC_LOG_DIR
     install -d ${D}${ADUC_LOG_DIR}
     chgrp ${ADUGROUP} ${D}${ADUC_LOG_DIR}
     chmod 0774 ${D}${ADUC_LOG_DIR}
-
 
     # Use only until FS-Update implements the run as root function
     # Then the workflow is seperatet like it was intended by MS
