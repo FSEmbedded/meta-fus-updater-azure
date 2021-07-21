@@ -63,13 +63,13 @@ EXTRA_OECMAKE += "-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake"
 EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 
 # bash - for running shell scripts for install.
-# swupdate - to install update package.
 # adu-pub-key - to install public key for update package verification.
 # adu-device-info-files - to install the device info related files onto the image.
 # adu-hw-compat - to install the hardware compatibility file used by swupdate.
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
-RDEPENDS_${PN} += "bash swupdate adu-pub-key adu-device-info-files adu-hw-compat adu-log-dir deliveryoptimization-agent-service"
+
+RDEPENDS_${PN} += "bash adu-pub-key adu-device-info-files adu-log-dir deliveryoptimization-agent-service"
 
 INSANE_SKIP_${PN} += "installed-vs-shipped"
 
@@ -98,7 +98,6 @@ USERADD_PARAM_${PN}-adu = "\
     --uid 800 --system -g ${ADUGROUP} --home-dir /home/${ADUUSER} --no-create-home --shell /bin/false ${ADUUSER} ; \
     --uid 801 --system -g ${DOGROUP} -G ${ADUGROUP} --home-dir /home/${DOUSER} --no-create-home --shell /bin/false ${DOUSER} ; \
     "
-
 do_install_append() {
     #create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}
@@ -115,16 +114,7 @@ do_install_append() {
     chgrp ${ADUGROUP} ${D}${ADUC_LOG_DIR}
     chmod 0774 ${D}${ADUC_LOG_DIR}
 
-    #install adu-shell to /usr/lib/adu directory.
-    install -d ${D}${libdir}/adu
 
-    install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${libdir}/adu
-
-    #set owner for adu-shell
-    chown root:${ADUGROUP} ${D}${libdir}/adu/adu-shell
-
-    #set S UID for adu-shell
-    chmod u+s ${D}${libdir}/adu/adu-shell
 }
 
 FILES_${PN} += "${bindir}/AducIotAgent"
