@@ -25,10 +25,6 @@ EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 EXTRA_OECMAKE += "-DADUC_WARNINGS_AS_ERRORS=OFF"
 # Build the non-simulator (real) version of the client.
 EXTRA_OECMAKE += "-DADUC_PLATFORM_LAYER=linux"
-# Set the path to the manufacturer file
-EXTRA_OECMAKE += "-DADUC_MANUFACTURER_FILE=${sysconfdir}/adu-manufacturer"
-# Set the path to the model file
-EXTRA_OECMAKE += "-DADUC_MODEL_FILE=${sysconfdir}/adu-model"
 # Integrate with FS-Update as the installer
 EXTRA_OECMAKE += "-DADUC_CONTENT_HANDLERS=fus/fsupdate"
 # Set the path to the adu version file
