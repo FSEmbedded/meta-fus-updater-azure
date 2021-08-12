@@ -9,6 +9,14 @@ ADUC_KEY_DIR = "/adukey"
 
 DEPENDS = "openssl-native"
 
+SRC_URI_append := " \
+	file://passwd.pass \
+	file://privateKey.pem\
+"
+
+ADUC_PRIVATE_KEY ?= "${WORKDIR}/privateKey.pem"
+ADUC_PRIVATE_KEY_PASSWORD ?= "${WORKDIR}/passwd.pass"
+
 # Generated RSA key with password using command:
 # openssl genrsa -aes256 -passout file:priv.pass -out priv.pem
 
