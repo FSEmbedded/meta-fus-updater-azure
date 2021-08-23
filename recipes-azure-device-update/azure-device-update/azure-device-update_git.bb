@@ -11,8 +11,8 @@
 
 LICENSE = "CLOSED"
 
-SRC_URI = "file://fus-device-update-Y2021.07.tar.bz2"
-S = "${WORKDIR}/fus-device-update"
+SRC_URI = "file://fus-device-update-azure-Y2021.08.tar.bz2"
+S = "${WORKDIR}/fus-device-update-azure"
 
 # ADUC depends on azure-iot-sdk-c and DO Agent SDK
 DEPENDS = "azure-iot-sdk-c deliveryoptimization-agent curl deliveryoptimization-sdk"
