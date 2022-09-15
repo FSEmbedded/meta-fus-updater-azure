@@ -10,7 +10,7 @@
 
 LICENSE = "CLOSED"
 
-SRC_URI = "gitsm://github.com/microsoft/do-client;branch=main"
+SRC_URI = "gitsm://github.com/microsoft/do-client;branch=main;protocol=https"
 
 # Tag v0.7.0
 SRCREV = "3f00d1e0f841e6376f1c2852079e19ccc00f8ec4"
