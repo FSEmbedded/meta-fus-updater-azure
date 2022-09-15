@@ -1,0 +1,25 @@
+From 1ba2c4325493eb3b6ef6293890b7a2f9a1a3d507 Mon Sep 17 00:00:00 2001
+Message-Id: <1ba2c4325493eb3b6ef6293890b7a2f9a1a3d507.1663072641.git.grimmer@fs-net.de>
+From: Goetz Grimmer <grimmer@fs-net.de>
+Date: Tue, 13 Sep 2022 14:37:15 +0200
+Subject: [PATCH] test
+
+---
+ sdk/core/azure-core-tracing-opentelemetry/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sdk/core/azure-core-tracing-opentelemetry/CMakeLists.txt b/sdk/core/azure-core-tracing-opentelemetry/CMakeLists.txt
+index eb40eccb..1c9f50e6 100644
+--- a/sdk/core/azure-core-tracing-opentelemetry/CMakeLists.txt
++++ b/sdk/core/azure-core-tracing-opentelemetry/CMakeLists.txt
+@@ -14,7 +14,7 @@ if (NOT VCPKG_TARGET_TRIPLET MATCHES "windows" OR VCPKG_TARGET_TRIPLET MATCHES "
+     set(BUILD_AZURE_CORE_TRACING_OPENTELEMETRY ON)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 14)
++set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED True)
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+-- 
+2.14.5
