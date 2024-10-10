@@ -4,17 +4,17 @@ LICENSE = "CLOSED"
 
 SRC_URI = "gitsm://github.com/microsoft/do-client;branch=main;protocol=https"
 
-# Tag v0.7.0
-SRCREV = "3f00d1e0f841e6376f1c2852079e19ccc00f8ec4"
+# Tag v1.1.0
+SRCREV = "d71ade6f692dd8bc319ec3228c956517e9b29292"
 
 PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-DEPENDS = "boost cpprest libproxy msft-gsl"
+DEPENDS = "boost cpprest libproxy msft-gsl curl"
 
 inherit cmake
 
-BUILD_TYPE ?= "Debug"
+BUILD_TYPE ?= "Release"
 EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 # Specify build is for the sdk lib
 EXTRA_OECMAKE += "-DDO_INCLUDE_SDK=ON"
