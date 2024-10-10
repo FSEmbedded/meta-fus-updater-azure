@@ -1,0 +1,27 @@
+{
+    "schemaVersion": "1.1",
+    "aduShellTrustedUsers": [
+      "adu",
+      "do"
+    ],
+    "manufacturer": <manufacturer>,
+    "model": <model>,
+    "agents": [
+      {
+        "name": <name>,
+        "runas": "adu",
+        "connectionSource": {
+          "x509_container": <x509_store>,
+          "x509_cert": <x509_cert>,
+          "x509_key": <x509_key>,
+          "device_id": <device_id>,
+          "iotHubName": <iothub_name>,
+          "iotHubSuffix": <iothub_suffix>,
+          "connectionType": <connection_type>,
+          "connectionData": <connection_data>
+        },
+        "manufacturer": <manufacturer>,
+        "model": <model>
+      }
+    ]
+}

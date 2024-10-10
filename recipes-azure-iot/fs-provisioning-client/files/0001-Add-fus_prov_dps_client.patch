@@ -1,0 +1,620 @@
+From 1650cdde88cef300f2a364022f6737f25a33262a Mon Sep 17 00:00:00 2001
+From: Patrick Jakob <jakob@fs-net.de>
+Date: Thu, 23 Dec 2021 11:51:33 +0100
+Subject: Add fus_prov_dps_client
+
+
+diff --git a/provisioning_client/CMakeLists.txt b/provisioning_client/CMakeLists.txt
+index 60f996211..03c16a45d 100644
+--- a/provisioning_client/CMakeLists.txt
++++ b/provisioning_client/CMakeLists.txt
+@@ -373,6 +373,10 @@ if (${use_prov_client} AND (NOT ${skip_samples}))
+     add_subdirectory(tools)
+ endif ()
+ 
++if (${use_prov_client} AND ${use_fs_prov_client} AND ${skip_samples})
++    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/samples/fus_prov_dps_client)
++endif ()
++
+ if(${use_installed_dependencies})
+ 
+     # Install Provisioning libs
+diff --git a/provisioning_client/samples/fus_prov_dps_client/CMakeLists.txt b/provisioning_client/samples/fus_prov_dps_client/CMakeLists.txt
+new file mode 100644
+index 000000000..35ca1a408
+--- /dev/null
++++ b/provisioning_client/samples/fus_prov_dps_client/CMakeLists.txt
+@@ -0,0 +1,61 @@
++#Copyright (c) Microsoft. All rights reserved.
++#Licensed under the MIT license. See LICENSE file in the project root for full license information.
++
++compileAsC99()
++
++set(fus_prov_dps_client_c_files
++    fus_prov_dps_client.c
++)
++
++set(fus_prov_dps_client_h_files
++)
++
++set(HSM_INCLUDE_DIR "../../adapters")
++
++IF(WIN32)
++    #windows needs this define
++    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
++ENDIF(WIN32)
++
++#Conditionally use the SDK trusted certs in the samples
++if(${use_sample_trusted_cert})
++    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
++    include_directories(${PROJECT_SOURCE_DIR}/certs)
++    set(fus_prov_dps_client_c_files ${fus_prov_dps_client_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
++endif()
++
++include_directories(.)
++include_directories(${IOTHUB_CLIENT_INC_FOLDER})
++include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
++include_directories(${SHARED_UTIL_INC_FOLDER})
++include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
++include_directories(${HSM_INCLUDE_DIR})
++
++add_executable(fus_prov_dps_client ${fus_prov_dps_client_c_files} ${fus_prov_dps_client_h_files})
++
++target_link_libraries(fus_prov_dps_client
++    iothub_client
++    prov_device_client)
++
++if(${use_openssl})
++    add_definitions(-DUSE_OPENSSL)
++    if (WIN32)
++        target_link_libraries(fus_prov_dps_client $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
++        file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
++        file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
++    endif()
++endif()
++
++if (${use_http})
++    target_link_libraries(fus_prov_dps_client prov_http_transport)
++endif()
++if (${use_mqtt})
++    target_link_libraries(fus_prov_dps_client iothub_client_mqtt_transport prov_mqtt_transport prov_mqtt_ws_transport)
++endif()
++if (${use_amqp})
++    target_link_libraries(fus_prov_dps_client iothub_client_amqp_transport prov_amqp_ws_transport prov_amqp_transport)
++    linkUAMQP(fus_prov_dps_client)
++endif()
++
++link_security_client(fus_prov_dps_client)
++linkSharedUtil(fus_prov_dps_client)
+diff --git a/provisioning_client/samples/fus_prov_dps_client/fus_prov_dps_client.c b/provisioning_client/samples/fus_prov_dps_client/fus_prov_dps_client.c
+new file mode 100644
+index 000000000..906b424d6
+--- /dev/null
++++ b/provisioning_client/samples/fus_prov_dps_client/fus_prov_dps_client.c
+@@ -0,0 +1,526 @@
++// Copyright (c) Microsoft. All rights reserved.
++// Licensed under the MIT license. See LICENSE file in the project root for full license information.
++
++// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
++// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
++// when writing production code.
++
++#include <stdio.h>
++#include <stdlib.h>
++
++#include <string.h>
++ 
++#include "hsm_client_data.h"
++
++#include "iothub.h"
++#include "azure_c_shared_utility/shared_util_options.h"
++#include "azure_c_shared_utility/http_proxy_io.h"
++#include "azure_c_shared_utility/threadapi.h"
++
++#include "azure_prov_client/prov_device_client.h"
++#include "azure_prov_client/prov_security_factory.h"
++
++#ifdef SET_TRUSTED_CERT_IN_SAMPLES
++#include "certs.h"
++#endif // SET_TRUSTED_CERT_IN_SAMPLES
++
++//
++// The protocol you wish to use should be uncommented
++//
++#define SAMPLE_MQTT
++//#define SAMPLE_MQTT_OVER_WEBSOCKETS
++//#define SAMPLE_AMQP
++//#define SAMPLE_AMQP_OVER_WEBSOCKETS
++//#define SAMPLE_HTTP
++
++#ifdef SAMPLE_MQTT
++#include "iothubtransportmqtt.h"
++#include "azure_prov_client/prov_transport_mqtt_client.h"
++#endif // SAMPLE_MQTT
++#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
++#include "iothubtransportmqtt_websockets.h"
++#include "azure_prov_client/prov_transport_mqtt_ws_client.h"
++#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
++#ifdef SAMPLE_AMQP
++#include "iothubtransportamqp.h"
++#include "azure_prov_client/prov_transport_amqp_client.h"
++#endif // SAMPLE_AMQP
++#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
++#include "iothubtransportamqp_websockets.h"
++#include "azure_prov_client/prov_transport_amqp_ws_client.h"
++#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
++#ifdef SAMPLE_HTTP
++#include "iothubtransporthttp.h"
++#include "azure_prov_client/prov_transport_http_client.h"
++#endif // SAMPLE_HTTP
++
++#ifdef SET_TRUSTED_CERT_IN_SAMPLES
++#include "certs.h"
++#endif // SET_TRUSTED_CERT_IN_SAMPLES
++
++// This sample is to demostrate iothub reconnection with provisioning and should not
++// be confused as production code
++
++MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
++MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
++
++static const char* global_prov_uri = "global.azure-devices-provisioning.net";
++static const char* id_scope = "[ID Scope]";
++static const char* common_name_file;
++static const char* certifacate_file;
++static const char* key_file;
++static PROV_DEVICE_RESULT l_dev_result_status = 0;
++static PROV_DEVICE_REG_STATUS l_dev_reg_status = 0;
++
++volatile static bool g_registration_complete = false;
++static bool g_use_proxy = false;
++static const char* PROXY_ADDRESS = "127.0.0.1";
++
++#define PROXY_PORT                  8888
++#define MESSAGES_TO_SEND            2
++#define TIME_BETWEEN_MESSAGES       2
++
++#define DEFAULT_COMMON_NAME	"Device_identity.txt";
++#define DEFAULT_CERTIFICATE	"new-device.cert.pem";
++#define DEFAULT_PRIVATE_KEY	"new-device.key.pem";
++
++static void registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
++{
++	(void)user_context;
++	(void)printf("Provisioning Status: %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_REG_STATUS, reg_status));
++	l_dev_reg_status = reg_status;
++}
++
++static void register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
++{
++	(void)user_context;
++	if (register_result == PROV_DEVICE_RESULT_OK)
++	{
++		(void)printf("\r\nRegistration Information received from service: %s, deviceId: %s\r\n", iothub_uri, device_id);
++	}
++	else
++	{
++		(void)printf("\r\nFailure registering device: %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result));
++	}
++	g_registration_complete = true;
++	l_dev_result_status = register_result;
++}
++
++int main(int argc, char *argv[])
++{
++	PROV_DEVICE_RESULT prov_device_result = PROV_DEVICE_RESULT_ERROR;
++	PROV_DEVICE_HANDLE prov_device_handle;
++
++	if(argc < 1) 
++	{
++		printf("Failure. Number of parameters too low. %s \n", *argv);
++		return EXIT_FAILURE;
++	}
++
++	if(argv[1] == 0 || !strcmp(argv[1], ""))
++	{
++		printf("ERROR: ID Scope is not defined.\n");
++		return 0;
++	}
++	
++	id_scope = argv[1];
++
++	if(argv[2] == 0 || !strcmp(argv[2], ""))
++	{
++		printf("WARNING: Use default device indentifier.\n");
++		common_name_file = DEFAULT_COMMON_NAME;
++	}
++	else
++		common_name_file = argv[2];
++
++	if(argv[3] == 0 || !strcmp(argv[3], ""))
++	{
++		printf("WARNING: Use default certificate name.\n");
++		certifacate_file = DEFAULT_CERTIFICATE;
++	}
++	else
++		certifacate_file = argv[3];
++	
++	if(argv[4] == 0 || !strcmp(argv[4], ""))
++	{
++		printf("WARNING: Use default key name.\n");
++		key_file = DEFAULT_PRIVATE_KEY;
++	}
++	else
++		key_file = argv[4];
++	
++
++	SECURE_DEVICE_TYPE hsm_type;
++	//hsm_type = SECURE_DEVICE_TYPE_TPM;
++	//hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
++	hsm_type = SECURE_DEVICE_TYPE_X509;
++
++	// Used to initialize IoTHub SDK subsystem
++	(void)IoTHub_Init();
++	(void)prov_dev_security_init(hsm_type);
++
++	// Set the symmetric key if using they auth type
++	//prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
++
++	HTTP_PROXY_OPTIONS http_proxy;
++	PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
++
++	memset(&http_proxy, 0, sizeof(HTTP_PROXY_OPTIONS));
++
++	// Protocol to USE - HTTP, AMQP, AMQP_WS, MQTT, MQTT_WS
++#ifdef SAMPLE_MQTT
++	prov_transport = Prov_Device_MQTT_Protocol;
++#endif // SAMPLE_MQTT
++#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
++	prov_transport = Prov_Device_MQTT_WS_Protocol;
++#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
++#ifdef SAMPLE_AMQP
++	prov_transport = Prov_Device_AMQP_Protocol;
++#endif // SAMPLE_AMQP
++#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
++	prov_transport = Prov_Device_AMQP_WS_Protocol;
++#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
++#ifdef SAMPLE_HTTP
++	prov_transport = Prov_Device_HTTP_Protocol;
++#endif // SAMPLE_HTTP
++
++	printf("Provisioning API Version: %s\r\n", Prov_Device_GetVersionString());
++
++	if (g_use_proxy)
++	{
++		http_proxy.host_address = PROXY_ADDRESS;
++		http_proxy.port = PROXY_PORT;
++	}
++
++	if ((prov_device_handle = Prov_Device_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
++	{
++		(void)printf("failed calling Prov_Device_Create\r\n");
++	}
++	else
++	{
++		if (http_proxy.host_address != NULL)
++		{
++			Prov_Device_SetOption(prov_device_handle, OPTION_HTTP_PROXY, &http_proxy);
++		}
++
++		//bool traceOn = true;
++		//Prov_Device_SetOption(prov_device_handle, PROV_OPTION_LOG_TRACE, &traceOn);
++#ifdef SET_TRUSTED_CERT_IN_SAMPLES
++		// Setting the Trusted Certificate. This is only necessary on systems without
++		// built in certificate stores.
++		Prov_Device_SetOption(prov_device_handle, OPTION_TRUSTED_CERT, certificates);
++#endif // SET_TRUSTED_CERT_IN_SAMPLES
++
++		// This option sets the registration ID it overrides the registration ID that is 
++		// set within the HSM so be cautious if setting this value
++		//Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
++
++		prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registration_status_callback, NULL);
++
++		if (prov_device_result == PROV_DEVICE_RESULT_OK)
++		{
++			(void)printf("\r\nRegistering Device\r\n\r\n");
++			do
++			{
++				ThreadAPI_Sleep(1000);
++			} while (!g_registration_complete);
++		}
++		else
++		{
++			(void)printf("\r\nRegistering failed with error: %d\r\n\r\n", prov_device_result);
++		}
++
++		Prov_Device_Destroy(prov_device_handle);
++	}
++	prov_dev_security_deinit();
++
++	// Free all the sdk subsystem
++	IoTHub_Deinit();
++
++	if(prov_device_result == PROV_DEVICE_RESULT_OK && l_dev_result_status != 0)
++		return l_dev_result_status;
++	else if (prov_device_result == PROV_DEVICE_RESULT_OK && l_dev_reg_status != 0)
++		return l_dev_reg_status;
++
++	return prov_device_result;
++}
++
++
++/* ############################################################################ */
++/* ############################# H S M - C O D E ############################## */
++/* ############################################################################ */
++ 
++typedef struct CUSTOM_HSM_SAMPLE_INFO_TAG
++{
++	const char* certificate_file;
++	const char* common_name_file;
++	const char* key_file;
++	char* certificate;
++	char* common_name;
++	char* key;
++} CUSTOM_HSM_SAMPLE_INFO;
++ 
++int hsm_client_x509_init()
++{
++	return 0;
++}
++ 
++void hsm_client_x509_deinit()
++{
++}
++ 
++int hsm_client_tpm_init()
++{
++	return 0;
++}
++ 
++void hsm_client_tpm_deinit()
++{
++}
++ 
++HSM_CLIENT_HANDLE custom_hsm_create()
++{
++	CUSTOM_HSM_SAMPLE_INFO* hsm_info = malloc(sizeof(CUSTOM_HSM_SAMPLE_INFO));
++	if (hsm_info == NULL)
++	{
++		(void)printf("Failued allocating hsm info\r\n");
++		return NULL;
++	}
++	else
++	{
++		// TODO: initialize any variables here
++		hsm_info->certificate_file = certifacate_file;
++		hsm_info->key_file = key_file;
++		hsm_info->common_name_file = common_name_file;
++		hsm_info->certificate = NULL;
++		hsm_info->key = NULL;
++		hsm_info->common_name = NULL;
++			 
++		(void)printf("Device Certificate Name File: %s \r\n", common_name_file);
++		(void)printf("Device Certificate PEM File : %s \r\n", certifacate_file);
++		(void)printf("Device Private Key PEM File : %s \r\n", key_file);
++	}
++	return (HSM_CLIENT_HANDLE)hsm_info;
++}
++ 
++void custom_hsm_destroy(HSM_CLIENT_HANDLE handle)
++{
++	if (handle != NULL)
++	{
++		CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
++		// Free anything that has been allocated in this module
++		free(hsm_info->certificate);
++		free(hsm_info->key);
++		free(hsm_info->common_name);
++		free(hsm_info);
++	}
++}
++ 
++char* custom_hsm_get_certificate(HSM_CLIENT_HANDLE handle)
++{
++	//TODO: File soll als Kommandozeilenparameter oder per Eingabe ausgewählt werden
++	char* result = NULL;
++ 
++	if (handle == NULL)
++	{
++		(void)printf("Invalid handle value specified\r\n");
++		result = NULL;
++	}
++	else
++	{
++		CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
++ 
++		if (hsm_info->certificate == NULL)
++		{
++			FILE* fCert = fopen(hsm_info->certificate_file, "r");
++ 
++			if (fCert != NULL)
++			{
++				fseek(fCert, 0, SEEK_END);
++				size_t len = ftell(fCert);
++				rewind(fCert);
++ 
++				if ((hsm_info->certificate = (char*)malloc(len + 1)) == NULL)
++				{
++					(void)printf("Failure allocating certificate cache\r\n");
++					result = NULL;
++				}
++				else
++				{
++					len = fread(hsm_info->certificate, 1, len, fCert);
++					fclose(fCert);
++					hsm_info->certificate[len] = 0;
++				}
++			}
++			else
++			{
++				(void)printf("Failure opening certificate file\r\n");
++				result = NULL;
++			}
++		}
++ 
++		if (hsm_info->certificate != NULL)
++		{
++			result = (char*)malloc(strlen(hsm_info->certificate) + 1);
++ 
++			if (result != NULL)
++			{
++				strcpy(result, hsm_info->certificate);
++			}
++			else
++			{
++				(void)printf("Failure allocating certificatee\r\n");
++			}
++		}
++	}
++ 
++	return result;
++}
++ 
++char* custom_hsm_get_key(HSM_CLIENT_HANDLE handle)
++{
++	char* result = NULL;
++ 
++	if (handle == NULL)
++	{
++		(void)printf("Invalid handle value specified\r\n");
++		result = NULL;
++	}
++	else
++	{
++		CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
++ 
++		if (hsm_info->key == NULL)
++		{
++			FILE* fKey = fopen(hsm_info->key_file, "r");
++ 
++			if (fKey != NULL)
++			{
++				fseek(fKey, 0, SEEK_END);
++				size_t len = ftell(fKey);
++				rewind(fKey);
++ 
++				if ((hsm_info->key = (char*)malloc(len + 1)) == NULL)
++				{
++					(void)printf("Failure allocating key cache\r\n");
++					result = NULL;
++				}
++				else
++				{
++					len = fread(hsm_info->key, 1, len, fKey);
++					fclose(fKey);
++					hsm_info->key[len] = 0;
++				}
++			}
++			else
++			{
++				(void)printf("Failure opening key file");
++				result = NULL;
++			}
++		}
++ 
++		if (hsm_info->key != NULL)
++		{
++			result = (char*)malloc(strlen(hsm_info->key) + 1);
++ 
++			if (result != NULL)
++			{
++				strcpy(result, hsm_info->key);
++			}
++			else
++			{
++				(void)printf("Failure allocating key\r\n");
++			}
++		}
++	}
++ 
++	return result;
++}
++ 
++char* custom_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
++{
++	char* result = NULL;
++	 
++	if (handle == NULL)
++	{
++		(void)printf("Invalid handle value specified\r\n");
++		result = NULL;
++	}
++	else
++	{
++		CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
++ 
++		if (hsm_info->common_name == NULL)
++		{
++			FILE* fName = fopen(hsm_info->common_name_file, "r");
++ 
++			if (fName != NULL)
++			{
++				fseek(fName, 0, SEEK_END);
++				size_t len = ftell(fName);
++				rewind(fName);
++				 
++				if ((hsm_info->common_name = (char*)malloc(len + 1)) == NULL)
++				{
++					(void)printf("Failure allocating comman name cache\r\n");
++					result = NULL;
++				}
++				else
++				{
++					len = fread(hsm_info->common_name, 1, len, fName);
++					fclose(fName);
++					hsm_info->common_name[len] = 0;
++				}
++			}
++			else
++			{
++				(void)printf("Failure opening key file");
++				result = NULL;
++			}
++		}
++ 
++		if (hsm_info->common_name != NULL)
++		{
++			result = (char*)malloc(strlen(hsm_info->common_name) + 1);
++ 
++			if (result != NULL)
++			{
++				strcpy(result, hsm_info->common_name);
++			}
++			else
++			{
++				(void)printf("Failure allocating common name\r\n");
++			}
++		}
++	}
++ 
++	return result;
++}
++ 
++// Defining the v-table for the x509 hsm calls
++static const HSM_CLIENT_X509_INTERFACE x509_interface =
++{
++	custom_hsm_create,
++	custom_hsm_destroy,
++	custom_hsm_get_certificate,
++	custom_hsm_get_key,
++	custom_hsm_get_common_name
++};
++ 
++const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface()
++{
++	return &x509_interface;
++}
++ 
++// Required to satisfy linker extern but not implemented by this custom library
++const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface()
++{
++	// tpm interface pointer
++	return NULL;
++}
++ 
++// Required to satisfy linker extern but not implemented by this custom library
++const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface()
++{
++	return NULL;
++}

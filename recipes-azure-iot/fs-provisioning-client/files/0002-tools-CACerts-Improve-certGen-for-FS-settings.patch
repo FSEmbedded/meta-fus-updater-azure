@@ -1,0 +1,68 @@
+From 7bacdde065e922ac26abdf996e824379f55d7a8b Mon Sep 17 00:00:00 2001
+From: Anatol Derksen <derksen@fs-net.de>
+Date: Tue, 13 Jun 2023 12:52:50 +0200
+Subject: tools:CACerts: Improve certGen.sh to use F&S settings
+
+Use F&S default values
+
+diff --git a/tools/CACertificates/certGen.sh b/tools/CACertificates/certGen.sh
+index 969991261..084244e3b 100755
+--- a/tools/CACertificates/certGen.sh
++++ b/tools/CACertificates/certGen.sh
+@@ -19,13 +19,13 @@ set -o pipefail # Exit if pipe failed
+ root_ca_dir="."
+ home_dir="."
+ algorithm="genrsa"
+-COUNTRY="US"
+-STATE="WA"
+-LOCALITY="Redmond"
+-ORGANIZATION_NAME="My Organization"
++COUNTRY="DE"
++STATE="BW"
++LOCALITY="Stuttgart"
++ORGANIZATION_NAME="FUS"
+ root_ca_password="1234"
+ key_bits_length="4096"
+-days_till_expire=30
++days_till_expire=3650
+ ca_chain_prefix="azure-iot-test-only.chain.ca"
+ intermediate_ca_dir="."
+ openssl_root_config_file="./openssl_root_ca.cnf"
+@@ -33,6 +33,7 @@ openssl_intermediate_config_file="./openssl_device_intermediate_ca.cnf"
+ intermediate_ca_password="1234"
+ root_ca_prefix="azure-iot-test-only.root.ca"
+ intermediate_ca_prefix="azure-iot-test-only.intermediate"
++device_cert_prefix="$2"
+ 
+ function makeCNsubject()
+ {
+@@ -343,10 +344,10 @@ function generate_device_certificate()
+         exit 1
+     fi
+ 
+-    rm -f ./private/new-device.key.pem
+-    rm -f ./certs/new-device.key.pem
+-    rm -f ./certs/new-device-full-chain.cert.pem
+-    generate_leaf_certificate "${1}" "new-device" \
++    rm -f ./private/$device_cert_prefix.key.pem
++    rm -f ./certs/$device_cert_prefix.key.pem
++    rm -f ./certs/$device_cert_prefix-full-chain.cert.pem
++    generate_leaf_certificate "${1}" "$device_cert_prefix" \
+                               "${root_ca_dir}" "${root_ca_password}" \
+                               "${openssl_root_config_file}"
+ }
+@@ -362,10 +363,10 @@ function generate_device_certificate_from_intermediate()
+         exit 1
+     fi
+ 
+-    rm -f ./private/new-device.key.pem
+-    rm -f ./certs/new-device.key.pem
+-    rm -f ./certs/new-device-full-chain.cert.pem
+-    generate_leaf_certificate "${1}" "new-device" \
++    rm -f ./private/$device_cert_prefix.key.pem
++    rm -f ./certs/$device_cert_prefix.key.pem
++    rm -f ./certs/$device_cert_prefix-full-chain.cert.pem
++    generate_leaf_certificate "${1}" "$device_cert_prefix" \
+                               "${intermediate_ca_dir}" "${intermediate_ca_password}" \
+                               "${openssl_intermediate_config_file}"
+ }
