@@ -6,42 +6,38 @@ HOMEPAGE = "https://github.com/Azure/azure-iot-sdk-c"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=4283671594edec4c13aeb073c219237a"
 
-# We pull from master branch in order to get PnP APIs
-SRC_URI = "gitsm://github.com/Azure/azure-iot-sdk-c.git;branch=lts_07_2022;protocol=https"
+# We pull from main branch in order to get PnP APIs
+SRC_URI = "gitsm://github.com/Azure/azure-iot-sdk-c.git;protocol=https;branch=lts_03_2024"
 
-# Same as in Buildroot
-SRCREV = "66d2752edba2158d3843f2eccb13375d0daab651"
-PV = "1.0+git${SRCREV}"
+SRCREV = "3d2e0fbac51b3b97a02c61da77cff90483a88047"
+PV = "1.0+git${SRCPV}"
+
 
 S = "${WORKDIR}/git"
 
 # util-linux for uuid-dev
 DEPENDS = "util-linux curl openssl boost cpprest libproxy msft-gsl"
 
-# This package does not contain a shared library or any runnable software
-ALLOW_EMPTY_${PN} = "1"
-
 inherit cmake
 
 # Do not use amqp since it is deprecated.
 # Do not build sample code to save build time.
-EXTRA_OECMAKE += "-Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Dskip_samples:BOOL=ON -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF"
+# use_http: required uhttp for eis_utils
+EXTRA_OECMAKE += "-Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Dskip_samples:BOOL=ON -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF -Duse_prov_client:BOOL=OFF"
 
-sysroot_stage_all_append () {
+sysroot_stage_all:append() {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
 }
 
-FILES_${PN}-dev += "\
-    /usr/cmake \
-    /usr/cmake/umock_cTargets.cmake \
-    /usr/cmake/umock_cConfigVersion.cmake \
-    /usr/cmake/umock_cConfig.cmake \
-    /usr/cmake/azure_macro_utils_cConfig.cmake \
-    /usr/cmake/azure_macro_utils_cTargets.cmake \
-    /usr/cmake/azure_macro_utils_cConfigVersion.cmake \
-    /usr/cmake/umock_cFunctions.cmake \
-    /usr/cmake/umock_cTargets-noconfig.cmake \
+#Placeholder file so do_rootfs / libdnf do not complain when packages-split/${PN} is empty
+do_install:append() {
+	install -d ${D}
+	echo "This package is linked against during compilation" > ${D}/azure-iot-sdk-c-placeholder-file
+	echo "Therefore, there is nothing to install on the target" >> ${D}/azure-iot-sdk-c-placeholder-file
+}
+
+FILES:${PN} += " \
+	/azure-iot-sdk-c-placeholder-file \
 "
 
-
-BBCLASSEXTEND = "native nativesdk"
+FILES:${PN}-dev += "${exec_prefix}/cmake"
