@@ -11,6 +11,6 @@ do_install() {
     install -m 0644 ${WORKDIR}/adu-logs.conf ${D}${sysconfdir}/tmpfiles.d
 }
 
-FILES_${PN} += "${sysconfdir}/tmpfiles.d/adu-logs.conf"
+FILES:${PN} += "${sysconfdir}/tmpfiles.d/adu-logs.conf"
 
 inherit allarch

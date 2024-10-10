@@ -9,7 +9,7 @@ ADUC_KEY_DIR = "/adukey"
 
 DEPENDS = "openssl-native"
 
-SRC_URI_append := " \
+SRC_URI:append := " \
 	file://passwd.pass \
 	file://privateKey.pem\
 "
@@ -35,6 +35,6 @@ do_install() {
     install -m 0444 public.pem ${D}${ADUC_KEY_DIR}/public.pem
 }
 
-FILES_${PN} += "${ADUC_KEY_DIR}/public.pem"
+FILES:${PN} += "${ADUC_KEY_DIR}/public.pem"
 
 inherit allarch

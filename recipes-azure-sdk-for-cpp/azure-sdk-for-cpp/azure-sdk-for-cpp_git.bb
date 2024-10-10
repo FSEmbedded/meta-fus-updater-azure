@@ -6,7 +6,7 @@ HOMEPAGE = "https://github.com/Azure/azure-sdk-for-cpp"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=e74f78882cab57fd1cc4c5482b9a214a"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI = "gitsm://github.com/Azure/azure-sdk-for-cpp.git;branch=main;protocol=https \
            file://0001-opentelemetry-cpp.patch \
@@ -20,11 +20,11 @@ S = "${WORKDIR}/git"
 # util-linux for uuid-dev
 # libxml2 for libxml2-dev
 DEPENDS = "util-linux curl openssl libxml2 opentelemetry-cpp"
-RDEPENDS_${PN} = "opentelemetry-cpp"
+RDEPENDS:${PN} = "opentelemetry-cpp"
 
 inherit cmake
 
-FILES_${PN} = " /usr/share/azure-storage-blobs-cpp \
+FILES:${PN} = " /usr/share/azure-storage-blobs-cpp \
                 /usr/share/azure-storage-queues-cpp \
                 /usr/share/azure-storage-common-cpp \
                 /usr/share/azure-storage-files-shares-cpp \

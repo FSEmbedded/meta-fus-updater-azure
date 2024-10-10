@@ -16,6 +16,6 @@ do_install() {
     install -m 0444 adu-hw-compat ${D}${sysconfdir}/adu-hw-compat
 }
 
-FILES_${PN} += "${sysconfdir}/adu-hw-compat"
+FILES:${PN} += "${sysconfdir}/adu-hw-compat"
 
 inherit allarch

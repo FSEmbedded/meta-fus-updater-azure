@@ -26,8 +26,8 @@ do_install() {
     install -m ugo=r adu-version ${D}${sysconfdir}/adu-version
 }
 
-FILES_${PN} += "${sysconfdir}/adu-manufacturer"
-FILES_${PN} += "${sysconfdir}/adu-model"
-FILES_${PN} += "${sysconfdir}/adu-version"
+FILES:${PN} += "${sysconfdir}/adu-manufacturer"
+FILES:${PN} += "${sysconfdir}/adu-model"
+FILES:${PN} += "${sysconfdir}/adu-version"
 
 inherit allarch
