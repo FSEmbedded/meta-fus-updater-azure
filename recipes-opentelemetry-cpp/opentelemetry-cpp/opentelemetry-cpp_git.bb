@@ -3,10 +3,11 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
 
 DEPENDS = "abseil-cpp curl"
-RDEPENDS_${PN} = "abseil-cpp libcurl"
+RDEPENDS:${PN} = "abseil-cpp libcurl"
 
+# use release tag v1.16.1
+SRCREV = "baecbb95bd63df53e0af16e87bc683967962c5f8"
 SRC_URI = "git://github.com/open-telemetry/opentelemetry-cpp;branch=main;protocol=https"
-SRCREV = "9e6fd1e0be243c3782bd523ffa20395e138dfc45"
 
 S = "${WORKDIR}/git"
 
