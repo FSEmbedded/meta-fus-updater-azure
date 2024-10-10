@@ -253,9 +253,9 @@ EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 # adu-hw-compat - to install the hardware compatibility file used by swupdate.
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
-RDEPENDS_${PN} += "bash swupdate adu-pub-key adu-device-info-files adu-hw-compat adu-log-dir deliveryoptimization-agent-service"
+RDEPENDS:${PN} += "bash swupdate adu-pub-key adu-device-info-files adu-hw-compat adu-log-dir deliveryoptimization-agent-service"
 
-INSANE_SKIP_${PN} += "installed-vs-shipped"
+INSANE_SKIP:${PN} += "installed-vs-shipped"
 
 ADUC_DATA_DIR = "/var/lib/adu"
 ADUC_LOG_DIR = "/adu/logs"
