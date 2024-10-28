@@ -24,6 +24,8 @@ SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
 ADU_GIT_COMMIT ?= ""
 
+SRC_URI[sha256sum] ?= ""
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRCREV = "${ADU_GIT_COMMIT}"
