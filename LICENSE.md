@@ -1,6 +1,5 @@
-# Device Update for IoT Hub
-
 Copyright (c) Microsoft Corporation
+Copyright (c) 2024 F&S Elektronik Systeme GmbH
 
 MIT License
 
