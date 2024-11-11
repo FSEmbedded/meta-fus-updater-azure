@@ -19,10 +19,10 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171d
 DESCRIPTION = "azure-device-update"
 
 ADU_GIT_BRANCH ?= "master"
-ADU_SRC_URI ?= ""
+ADU_SRC_URI ?= "git://github.com/FSEmbedded/fus-device-update-azure.git"
 SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
-ADU_GIT_COMMIT ?= ""
+ADU_GIT_COMMIT ?= "d11d7e6e0ba9ad0e115d3a46d397f9f7277dc72f"
 
 SRC_URI[sha256sum] ?= ""
 
