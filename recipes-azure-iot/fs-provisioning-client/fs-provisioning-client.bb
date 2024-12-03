@@ -9,7 +9,6 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 # Scripts and configuration for provisioning service
 SRC_URI = " \
     file://provisioning.sh \
-    file://addfsheader.sh \
     file://template-du-config.json \
     file://du-diagnostics-config.json \
     "
@@ -40,7 +39,6 @@ do_install () {
     # add
     install -d ${provservice}
     install ${WORKDIR}/provisioning.sh ${provservice}/
-    install ${WORKDIR}/addfsheader.sh ${provservice}/
     install ${WORKDIR}/template-du-config.json ${provservice}/
 }
 
