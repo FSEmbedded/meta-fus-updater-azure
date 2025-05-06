@@ -181,10 +181,8 @@ pack_certs()
 
 addfsheader()
 {
-		cp $HOME_DIR/addfsheader.sh $CUSTOMER_PATH/$DEVICE_PATH
 		cd $CUSTOMER_PATH/$DEVICE_PATH/
-		./addfsheader.sh -t CERT certs.tar.bz2 > certs.fs
-		rm addfsheader.sh
+		addfsheader.sh -t CERT certs.tar.bz2 > certs.fs
 }
 
 azure_login()
