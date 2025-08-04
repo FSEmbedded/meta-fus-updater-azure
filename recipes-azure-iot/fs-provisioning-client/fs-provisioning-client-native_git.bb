@@ -21,8 +21,10 @@ SRC_URI:append = " \
 
 S = "${WORKDIR}/git"
 
+FS_PROVISIONING_SERVICE_DIR_NAME ?="fs-provisioning"
+
 # util-linux for uuid-dev
-DEPENDS = "util-linux-libuuid-native openssl-native ca-certificates-native"
+DEPENDS = "util-linux-libuuid-native openssl-native ca-certificates-native curl-native pkgconfig-native"
 
 inherit cmake native
 
@@ -52,3 +54,5 @@ addtask deploy after do_install
 
 do_clean[depends] += "fs-provisioning-client:do_clean"
 do_clean[cleandirs] += "${DEPLOY_DIR_IMAGE}/${FS_PROVISIONING_SERVICE_DIR_NAME}"
+
+FILES:${PN} += "${WORKDIR}/${FS_PROVISIONING_SERVICE_DIR_NAME}"

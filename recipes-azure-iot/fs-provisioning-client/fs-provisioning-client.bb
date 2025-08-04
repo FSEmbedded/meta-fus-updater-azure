@@ -45,6 +45,9 @@ do_install () {
 do_deploy() {
     local prov_service_dir_name=fs-provisioning
     local provservice=${WORKDIR}/${prov_service_dir_name}
+
+    # make sure the deploy target exists
+    install -d ${DEPLOY_DIR_IMAGE}/${prov_service_dir_name}
     cp -rf ${provservice}/* ${DEPLOY_DIR_IMAGE}/${prov_service_dir_name}
 }
 
