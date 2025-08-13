@@ -24,6 +24,12 @@ RDEPENDS:${PN} = "opentelemetry-cpp"
 
 inherit cmake
 
+sysroot_stage_all:append () {
+    sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
+}
+
+FILES:${PN}-dev += "${exec_prefix}/cmake"
+
 FILES:${PN} = " /usr/share/azure-storage-blobs-cpp \
                 /usr/share/azure-storage-queues-cpp \
                 /usr/share/azure-storage-common-cpp \
