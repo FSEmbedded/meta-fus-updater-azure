@@ -18,7 +18,15 @@ SRCREV = "d71ade6f692dd8bc319ec3228c956517e9b29292"
 PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-DEPENDS = "boost curl cpprest libproxy msft-gsl"
+SRC_URI += "file://Findlibproxy.cmake.patch"
+SRC_URI += "file://Findglib-2.0.cmake.patch"
+# SRC_URI += "file://0001-Fix-incomplete-type-std-array-in-do_date_time.h.patch"
+SRC_URI += "file://0001-add-std-array-include-in-download-cpp.patch"
+SRC_URI += "file://0001-fix-array-incl-in-http_agent-cpp.patch"
+SRC_URI += "file://0001-incl-array-in-do-guid-cpp.patch"
+SRC_URI += "file://0001-add-glib-incl-paths-client-lite-CMakeLists.txt.patch"
+
+DEPENDS = "boost curl cpprest libproxy msft-gsl glib-2.0"
 
 inherit cmake
 
@@ -28,6 +36,9 @@ EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 EXTRA_OECMAKE += "-DDO_BUILD_TESTS=OFF"
 # Specify build is for deliveryoptimization-agent
 EXTRA_OECMAKE += "-DDO_INCLUDE_AGENT=ON"
+
+# DO recipes having trouble finding glib-object.h so modify cmake include path.
+EXTRA_OECMAKE += "-DCMAKE_INCLUDE_PATH=${WORKDIR}/recipe-sysroot/usr/include/glib-2.0"
 
 # cpprest installs its config.cmake file in a non-standard location.
 # Tell cmake where to find it.
