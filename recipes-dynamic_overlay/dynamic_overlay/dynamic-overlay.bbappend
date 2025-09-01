@@ -1,23 +1,8 @@
-FILES:${PN} += " \
-	/ramdisk_cert_store \
-"
+# Copyright (C) 2025 F&S Elektronik Systeme GmbH
+# Released under the GPLv2 license
+LICENSE = "GPL-2.0-only"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
-# path to root directory for device update agent
-EXTRA_OECMAKE += " -DTARGET_ADU_DIR_PATH=/adu"
-# path to x509 certificates
-EXTRA_OECMAKE += " -DTARGET_ARCHIV_DIR_PATH=/adu"
-# path to cerficates store. currently bz2 tarball required.
-EXTRA_OECMAKE += " -DSOURCE_ARCHIVE_MTD_FILE_PATH=/tmp/x509_cert_store.tar.bz2"
-# path to cerficates store. currently bz2 tarball required.
-EXTRA_OECMAKE += " -DSOURCE_ARCHIVE_MMC_FILE_PATH=/tmp/x509_cert_store.tar.bz2"
-# default cerificate name for device update agent
-EXTRA_OECMAKE += " -DFUS_AZURE_CERT_CERTIFICATE_NAME=example-com.cert.pem"
-# default key name for device update agent
-EXTRA_OECMAKE += " -DFUS_AZURE_CERT_KEY_NAME=example-com.key.pem"
-# mtd partition name for secure data store
-EXTRA_OECMAKE += " -DPART_NAME_MTD_CERT=Secure"
-
-# path to configuration for device update agent
-EXTRA_OECMAKE += " -DFUS_AZURE_CONFIGURATION=/adu/du-config.json"
-# enable support for certificates storage
-EXTRA_OECMAKE += " -DBUILD_X509_CERIFICATE_STORE_MOUNT=ON"
+# enable package config use-x509-cert
+ENABLE_X509_CERT ??= "1"
+PACKAGECONFIG:append = "${@bb.utils.contains('ENABLE_X509_CERT', '1', ' use-x509-cert', '', d)}"
