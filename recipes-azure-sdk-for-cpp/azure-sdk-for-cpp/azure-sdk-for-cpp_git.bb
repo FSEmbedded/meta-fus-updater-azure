@@ -10,7 +10,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI = "gitsm://github.com/Azure/azure-sdk-for-cpp.git;branch=main;protocol=https \
            file://0001-opentelemetry-cpp.patch \
-           file://0001-set-correct-cpp-version.patch"
+           file://0001-set-correct-cpp-version.patch \
+           file://0002-fix-gcc13-base64-compile-error.patch"
 
 SRCREV = "54111348d1914bbedcbc0140976d8d516c0ac52a"
 PV = "1.0+git${SRCPV}"
@@ -23,6 +24,17 @@ DEPENDS = "util-linux curl openssl libxml2 opentelemetry-cpp"
 RDEPENDS:${PN} = "opentelemetry-cpp"
 
 inherit cmake
+
+do_install:append() {
+    # TMPDIR/WORKDIR/B entfernen
+    find ${D} -type f -name "*Targets.cmake" -print0 | while IFS= read -r -d '' f; do
+        sed -i \
+            -e "s|${WORKDIR}||g" \
+            -e "s|${B}||g" \
+            -e "s|${S}||g" \
+            "$f"
+    done
+}
 
 sysroot_stage_all:append () {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
