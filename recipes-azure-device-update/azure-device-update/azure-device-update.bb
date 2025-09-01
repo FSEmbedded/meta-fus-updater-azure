@@ -34,7 +34,7 @@ PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 # ADUC depends on azure-iot-sdk-c, azure-sdk-for-cpp DO Agent SDK, and curl
-DEPENDS = "fs-updater-cli azure-iot-sdk-c azure-blob-storage-file-upload-utility deliveryoptimization-agent curl deliveryoptimization-sdk"
+DEPENDS = "libxml2 fs-updater-cli azure-iot-sdk-c azure-blob-storage-file-upload-utility deliveryoptimization-agent curl deliveryoptimization-sdk"
 RDEPENDS:${PN} += "bash adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 
 inherit cmake useradd
