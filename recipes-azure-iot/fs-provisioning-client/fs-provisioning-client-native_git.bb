@@ -21,11 +21,11 @@ SRC_URI:append = " \
 
 S = "${WORKDIR}/git"
 
-FS_PROVISIONING_SERVICE_DIR_NAME ?="fs-provisioning"
-
 # util-linux for uuid-dev
 DEPENDS = "util-linux-libuuid-native openssl-native ca-certificates-native curl-native pkgconfig-native"
 
+inherit fus-updater-defaults
+inherit fsup-provisioning-defaults
 inherit cmake native
 
 # Add options to build fus_prov_dps_client
