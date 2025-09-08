@@ -34,7 +34,17 @@ PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 # ADUC depends on azure-iot-sdk-c, azure-sdk-for-cpp DO Agent SDK, and curl
-DEPENDS = "libxml2 fs-updater-cli azure-iot-sdk-c azure-blob-storage-file-upload-utility deliveryoptimization-agent curl deliveryoptimization-sdk"
+DEPENDS = "\
+    fs-updater-cli \
+    azure-iot-sdk-c \
+    azure-blob-storage-file-upload-utility \
+    deliveryoptimization-agent \
+    curl \
+    deliveryoptimization-sdk \
+    libxml2 \
+    pkgconfig-native \
+    cmake-native"
+
 RDEPENDS:${PN} += "bash adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 
 inherit cmake useradd
@@ -77,7 +87,6 @@ EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 # EXTRA_OECMAKE += "-DADUC_LIBRARY_DIR=${STAGING_DIR_TARGET}"
 
 EXTRA_OECMAKE += "-DUPDATER_CLI_FULL_CMD='/usr/sbin/fs-updater'"
-EXTRA_OECMAKE += "-DADUC_DOWNLOADS_FOLDER:STRING=/tmp/adu"
 EXTRA_OECMAKE += "-DADUC_BUILD_PACKAGES:BOOL=false"
 EXTRA_OECMAKE += "-Duse_ms_default_handler=ON"
 EXTRA_OECMAKE += "-Duse_fsup_app_handler=OFF"
@@ -97,8 +106,6 @@ ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloa
 ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
 ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
 ADUC_DOWNLOADS_DIR ?= "${ADUC_DATA_DIR}/downloads"
-#ADUC_DOWNLOADS_DIR="/tmp/adu"
-ADUC_DOWNLOADS_FOLDER ?= "${ADUC_DOWNLOADS_DIR}"
 
 ADUC_LOG_DIR ?= "/adu/logs"
 ADUC_CONF_DIR ?= "/adu"
@@ -129,6 +136,13 @@ USERADD_PARAM:${PN} = "\
 
 do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
 do_compile[depends] += "azure-sdk-for-cpp:do_prepare_recipe_sysroot"
+
+do_configure:append() {
+    # Fix libxml2 path in ninja build file for Yocto 5.0.11
+    if [ -f ${B}/build.ninja ]; then
+        sed -i 's|/recipe-sysroot/usr/lib/libxml2.so|${STAGING_LIBDIR}/libxml2.so|g' ${B}/build.ninja
+    fi
+}
 
 do_install:append() {
     #create ADUC_DATA_DIR
