@@ -29,11 +29,17 @@ sysroot_stage_all:append() {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
 }
 
-#Placeholder file so do_rootfs / libdnf do not complain when packages-split/${PN} is empty
 do_install:append() {
-	install -d ${D}
-	echo "This package is linked against during compilation" > ${D}/azure-iot-sdk-c-placeholder-file
-	echo "Therefore, there is nothing to install on the target" >> ${D}/azure-iot-sdk-c-placeholder-file
+   # Clean buildpaths from cmake target files for QA compliance
+   if [ -d ${D}${libdir}/cmake ]; then
+       find ${D}${libdir}/cmake -name "*Targets*.cmake" -exec \
+           sed -i 's|${TMPDIR}[^"]*||g; s|${WORKDIR}[^"]*||g' {} \;
+   fi
+
+   # Placeholder file so do_rootfs / libdnf do not complain when packages-split/${PN} is empty
+   install -d ${D}
+   echo "This package is linked against during compilation" > ${D}/azure-iot-sdk-c-placeholder-file
+   echo "Therefore, there is nothing to install on the target" >> ${D}/azure-iot-sdk-c-placeholder-file
 }
 
 FILES:${PN} += " \
