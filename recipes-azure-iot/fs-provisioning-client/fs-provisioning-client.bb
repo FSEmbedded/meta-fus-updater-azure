@@ -3,7 +3,6 @@ AUTHOR = "F&S Elektronik Systeme GmbH"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 # Scripts and configuration for provisioning service
@@ -15,6 +14,8 @@ SRC_URI = " \
 
 # build fs_prov_client
 DEPENDS = "fs-provisioning-client-native"
+
+inherit fsup-provisioning-defaults
 
 do_install () {
     local prov_service_dir_name=fs-provisioning
@@ -35,7 +36,8 @@ do_install () {
     sed -i "s/<connection_data>/\"\"/g" ${D}/adu/du-config.json
     sed -i 's/<name>/\"fs\/fsupdate\"/g' ${D}/adu/du-config.json
     sed -i 's/<manufacturer>/\"FUS\"/g' ${D}/adu/du-config.json
-    sed -i 's/<model>/\"${MACHINE}\"/g' ${D}/adu/du-config.json
+    sed -i "s|<model>|\"${MACHINE}\"|g" ${D}/adu/du-config.json
+    sed -i "s|<downloads_folder>|\"${ADUC_DOWNLOADS_DIR}\"|g" ${D}/adu/du-config.json
     # add
     install -d ${provservice}
     install ${WORKDIR}/provisioning.sh ${provservice}/
