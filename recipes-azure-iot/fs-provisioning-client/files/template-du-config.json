@@ -6,6 +6,7 @@
     ],
     "manufacturer": <manufacturer>,
     "model": <model>,
+    "downloadsFolder": <downloads_folder>,
     "agents": [
       {
         "name": <name>,

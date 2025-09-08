@@ -205,20 +205,22 @@ patch_twin()
 
 du_conf()
 {
+	local config_file="$CUSTOMER_PATH/$DEVICE_PATH/du-config.json"
 	# copy template-du-config.json to specific device directory
-	cp -rf $HOME_DIR/template-du-config.json $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
+	cp -rf $HOME_DIR/template-du-config.json $config_file
 	# replace place holder with configured strings
-	sed -i "s/<x509_store>/\"\/adu\/x509_c\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<x509_cert>/\""${device_id}".cert.pem\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<x509_key>/\""${device_id}".key.pem\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<device_id>/\"${device_id}\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<iothub_name>/\"${iot_hub}\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<iothub_suffix>/\"azure-devices.net\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<connection_type>/\"x509\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<connection_data>/\"\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<name>/\"fus\/update\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<manufacturer>/\"${MANIFEST_PROVIDER}\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
-	sed -i "s/<model>/\"${MANIFEST_DEVICE_MOD}\"/g" $CUSTOMER_PATH/$DEVICE_PATH/du-config.json
+	sed -i "s|<x509_store>|\"/adu/x509_c\"|g" "$config_file"
+    sed -i "s|<x509_cert>|\"${device_id}.cert.pem\"|g" "$config_file"
+    sed -i "s|<x509_key>|\"${device_id}.key.pem\"|g" "$config_file"
+    sed -i "s|<device_id>|\"${device_id}\"|g" "$config_file"
+    sed -i "s|<iothub_name>|\"${iot_hub}\"|g" "$config_file"
+    sed -i "s|<iothub_suffix>|\"azure-devices.net\"|g" "$config_file"
+    sed -i "s|<connection_type>|\"x509\"|g" "$config_file"
+    sed -i "s|<connection_data>|\"\"|g" "$config_file"
+    sed -i "s|<name>|\"fus/update\"|g" "$config_file"
+    sed -i "s|<manufacturer>|\"${MANIFEST_PROVIDER}\"|g" "$config_file"
+    sed -i "s|<model>|\"${MANIFEST_DEVICE_MOD}\"|g" "$config_file"
+    sed -i "s|<downloads_folder>|\"${ADUC_DOWNLOADS_DIR}\"|g" "$config_file"
 }
 
 main()
