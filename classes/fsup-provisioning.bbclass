@@ -1,25 +1,8 @@
 # F&S provisiong functions to create certificates
 # and create device on azure iothub
 
-# enviroments to create device certificate(s)
-# see create_device_certificate
-# directory name
-FS_PROVISIONING_SERVICE_DIR_NAME ?="fs-provisioning"
-FS_PROVISIONING_UPDATE_DEVICES_SUBDIR ?="fus-devices"
-UPDATE_DEVICES_LIST ?="dev01 dev02"
-FS_PROVISIONING_IOTHUB ?=""
-FS_PROVISIONING_DPS_IDSCOPE ?=""
-# enviroments to create application image
-APPLICATION_VERSION ?="20241019"
-APPLICATION_CONTAINER_NAME ?= "application_container"
-# enviroments to create firmware image
-FIRMWARE_VERSION ?= "20241019"
-# enviroments to create manifests for firmware or application
-MANIFEST_PROVIDER ?="FUS"
-MANIFEST_UPDATE_NAME ?="FUS-Update"
-MANIFEST_FW_UPDATE_VERSION ?="1.0"
-MANIFEST_APP_UPDATE_VERSION ?="1.0"
-MANIFEST_DEVICE_MOD ?="fsimx"
+inherit fsup-provisioning-defaults
+inherit fus-updater-defaults
 
 # add data dir for second rw partition
 create_device_certificate() {
@@ -37,6 +20,7 @@ create_device_certificate() {
     # use MANIFEST_PROVIDER, MANIFEST_DEVICE_MOD in provisioning.sh
     export MANIFEST_PROVIDER="${MANIFEST_PROVIDER}"
     export MANIFEST_DEVICE_MOD="${MANIFEST_DEVICE_MOD}"
+    export ADUC_DOWNLOADS_DIR="${ADUC_DOWNLOADS_DIR}"
 
     # log fsup env. block
     bbdebug 1 ""
