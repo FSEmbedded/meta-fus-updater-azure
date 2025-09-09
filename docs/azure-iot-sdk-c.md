@@ -50,6 +50,7 @@ Configuration file is used by device update agent to get informations about iot 
     ],
     "manufacturer": <manufacturer>,
     "model": <model>,
+    "downloadsFolder": <downloads_folder>,
     "agents": [
       {
         "name": <name>,
@@ -80,6 +81,7 @@ E.g. configuration file for device name *dev01*
     ],
     "manufacturer": "FUS",
     "model": "fsimx8mp",
+    "downloadsFolder": "/tmp/adu",
     "agents": [
       {
         "name": "fus/update",
@@ -119,4 +121,5 @@ For the build process following environmets can be adapted:
 - *MANIFEST_FW_UPDATE_VERSION firmware update version for Azure manifest
 - *MANIFEST_APP_UPDATE_VERSION* application update version for Azure manifest
 - *MANIFEST_DEVICE_MOD* device modell for azure Manifest
+- *ADUC_DOWNLOADS_DIR* download directory for update agent
 
