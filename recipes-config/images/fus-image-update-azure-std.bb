@@ -70,3 +70,5 @@ EXTRA_USERS_PARAMS = "groupadd --gid 800 adu ; \
  useradd --uid 800 -p '' -r -g adu --no-create-home --shell /bin/false adu ; \
  useradd --uid 801 -p '' -r -g do -G adu --no-create-home --shell /bin/false do ; \
  "
+
+IMAGE_NAME_SUFFIX = "-update-azure"
