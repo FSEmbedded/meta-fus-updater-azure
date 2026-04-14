@@ -1,6 +1,7 @@
 # Build and install the azure-blob-storage-file-upload-utility
 
-DESCRIPTION = "Microsoft Azure SD for CPP"
+SUMMARY = "Microsoft Azure SDK for C++"
+DESCRIPTION = "Microsoft Azure SDK for C++"
 AUTHOR = "Microsoft Corporation"
 HOMEPAGE = "https://github.com/Azure/azure-sdk-for-cpp"
 LICENSE = "MIT"
@@ -42,18 +43,20 @@ sysroot_stage_all:append () {
 
 FILES:${PN}-dev += "${exec_prefix}/cmake"
 
-FILES:${PN} = " /usr/share/azure-storage-blobs-cpp \
-                /usr/share/azure-storage-queues-cpp \
-                /usr/share/azure-storage-common-cpp \
-                /usr/share/azure-storage-files-shares-cpp \
-                /usr/share/azure-security-attestation-cpp \
-                /usr/share/azure-security-keyvault-secrets-cpp \
-                /usr/share/azure-security-keyvault-certificates-cpp \
-                /usr/share/azure-security-keyvault-keys-cpp \
-                /usr/share/azure-identity-cpp \
-                /usr/share/azure-template-cpp \
-                /usr/share/azure-core-cpp \
-                /usr/share/azure-core-tracing-opentelemetry-cpp \
-                /usr/share/azure-storage-files-datalake-cpp"
+FILES:${PN} = " \
+    ${datadir}/azure-storage-blobs-cpp \
+    ${datadir}/azure-storage-queues-cpp \
+    ${datadir}/azure-storage-common-cpp \
+    ${datadir}/azure-storage-files-shares-cpp \
+    ${datadir}/azure-security-attestation-cpp \
+    ${datadir}/azure-security-keyvault-secrets-cpp \
+    ${datadir}/azure-security-keyvault-certificates-cpp \
+    ${datadir}/azure-security-keyvault-keys-cpp \
+    ${datadir}/azure-identity-cpp \
+    ${datadir}/azure-template-cpp \
+    ${datadir}/azure-core-cpp \
+    ${datadir}/azure-core-tracing-opentelemetry-cpp \
+    ${datadir}/azure-storage-files-datalake-cpp \
+"
 
 BBCLASSEXTEND = "native nativesdk"
