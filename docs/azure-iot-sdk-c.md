@@ -87,7 +87,7 @@ E.g. configuration file for device name *dev01*
         "name": "fus/update",
         "runas": "adu",
         "connectionSource": {
-          "x509_container": "/adu/x509_c",
+          "x509_container": "/etc/adu/x509_c",
           "x509_cert": "dev01.cert.pem",
           "x509_key": "dev01.key.pem",
           "device_id": "dev01",
