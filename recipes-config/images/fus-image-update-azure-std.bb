@@ -60,18 +60,4 @@ do_clean:append () {
     bb.build.exec_func('fsup_certs_clean', d)
 }
 
-# Image level user/group configuration.
-# Inherit extrausers to make the setting of EXTRA_USERS_PARAMS effective.
-INHERIT += "extrausers"
-
-# User / group settings
-# The settings are separated by the ; character.
-# Each setting is actually a command. The supported commands are useradd,
-# groupadd, userdel, groupdel, usermod and groupmod.
-EXTRA_USERS_PARAMS = "groupadd --gid 800 adu ; \
- groupadd -r --gid 801 do ; \
- useradd --uid 800 -p '' -r -g adu --no-create-home --shell /bin/false adu ; \
- useradd --uid 801 -p '' -r -g do -G adu --no-create-home --shell /bin/false do ; \
- "
-
 IMAGE_NAME_SUFFIX = "-update-azure"
