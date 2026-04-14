@@ -1,21 +1,19 @@
-# Generates a text file with the ADU hardware compatibility info
-# and copies/installs that file into the image.
-# This file is used by swupdate (or potentially other installer)
-# to determine if an update is compatible with this hardware.
+# Generates ADU hardware compatibility info file.
+# Used to determine if an update is compatible with this hardware.
 
-LICENSE="CLOSED"
+SUMMARY = "ADU hardware compatibility file"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-# Generate the hardware compatability file
+inherit allarch
+
 do_compile() {
     echo -n "${MACHINE} ${HW_REV}" > adu-hw-compat
 }
 
-# Install the hardware compatability file on the image in /etc
 do_install() {
     install -d ${D}${sysconfdir}
     install -m 0444 adu-hw-compat ${D}${sysconfdir}/adu-hw-compat
 }
 
-FILES:${PN} += "${sysconfdir}/adu-hw-compat"
-
-inherit allarch
+FILES:${PN} = "${sysconfdir}/adu-hw-compat"

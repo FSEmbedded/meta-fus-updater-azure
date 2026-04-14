@@ -1,24 +1,22 @@
-# Generates a text file with the ADU applicability info
-# for manufacturer and model and copies/installs that file into the image.
+# Generates ADU applicability info files (manufacturer, model, version)
+# and installs them into the image.
+#
+# MANUFACTURER          Reported through the Device Information PnP Interface.
+# MODEL                 Reported through the Device Information PnP Interface.
+# ADU_SOFTWARE_VERSION  Software version read by ADU Client.
 
-# Environment variables that can be used to configure the behaviour of this recipe.
-# MANUFACTURER          The manufacturer string that will be written to the manufacturer
-#                       file and reported through the Device Information PnP Interface.
-# MODEL                 The model string that wil be written to the model file and
-#                       reported through the Device Information PnP Interface.
-# ADU_SOFTWARE_VERSION  The software version for the image/firmware. Will be written to
-#                       the version file that is read by ADU Client.
+SUMMARY = "ADU device information files"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-LICENSE="CLOSED"
+inherit allarch
 
-# Generate the manufacturer, model, and version files
 do_compile() {
     echo "${MANUFACTURER}" > adu-manufacturer
     echo "${MODEL}" > adu-model
     echo "${ADU_SOFTWARE_VERSION}" > adu-version
 }
 
-# Install the files on the image in /etc
 do_install() {
     install -d ${D}${sysconfdir}
     install -m ugo=r adu-manufacturer ${D}${sysconfdir}/adu-manufacturer
@@ -26,8 +24,8 @@ do_install() {
     install -m ugo=r adu-version ${D}${sysconfdir}/adu-version
 }
 
-FILES:${PN} += "${sysconfdir}/adu-manufacturer"
-FILES:${PN} += "${sysconfdir}/adu-model"
-FILES:${PN} += "${sysconfdir}/adu-version"
-
-inherit allarch
+FILES:${PN} = " \
+    ${sysconfdir}/adu-manufacturer \
+    ${sysconfdir}/adu-model \
+    ${sysconfdir}/adu-version \
+"
