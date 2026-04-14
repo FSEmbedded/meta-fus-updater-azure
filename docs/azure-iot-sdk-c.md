@@ -5,10 +5,10 @@ The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ 
 
 ### Integration of FSUP Framework
 
-FSUP Framework extends provisiong client to use custom X509 certifactes. For this device certificates would be created. The *fus_prov_dps_client* use X509 certifcates to connect to Azure Provisiong service and to register
+FSUP Framework extends provisioning client to use custom X509 certificates. For this device certificates would be created. The *fus_prov_dps_client* uses X509 certificates to connect to Azure Provisioning service and to register
 devices for a given group.
 
-The framework offers a set of tools, scripts and configuration files to create cerficates and configuration files. All files and script can be found in *<build dir>/tmp/deploy/images/<architecture>/fs-provisioning* directory.
+The framework offers a set of tools, scripts and configuration files to create certificates and configuration files. All files and scripts can be found in *<build dir>/tmp/deploy/images/<architecture>/fs-provisioning* directory.
 
 ### Directory overview fs-provisioning
 
@@ -20,24 +20,24 @@ E.g.
   - *provisioning* - main script to create certificates and
     register device by Azure Device Provisioning Service (DPS).
   - *template-du-config.json* - template for device configuration.
-    Is used by provisiong script to create certs.fs binary for
+    Is used by provisioning script to create certs.fs binary for
     device "Secure" partition
 
 - [x509] directory
     - is a copy of "[azure-iot-sdk-c]/tools/AduCmdlets" directory.
       Use *certGen* script and *openssl_root_ca.cnf*, *openssl_device_intermediate_ca.cnf* to generate openssl certificates
-- [name of architecure] directory
-    - <certs> folder with root and interediate ca
+- [name of architecture] directory
+    - <certs> folder with root and intermediate ca
     - <devices> folder with device ca
     - ...
 
 # Device binaries
 
 For every listed device in *UPDATE_DEVICES_LIST* env. the function
-**create_device_certificate** creates certificats and confiugration file
+**create_device_certificate** creates certificates and configuration file
 du-config.json. Both are part of certs.fs
 
-Configuration file is used by device update agent to get informations about iot hub, certificates type and ssh keys.
+Configuration file is used by device update agent to get information about iot hub, certificate type and keys.
 
 **template-du-config.json**
 
@@ -106,20 +106,20 @@ E.g. configuration file for device name *dev01*
 
 ### Environments
 
-For the build process following environmets can be adapted:
+For the build process following environments can be adapted:
 
 - *FS_PROVISIONING_SERVICE_DIR_NAME* directory name of provisioning service
 - *FS_PROVISIONING_UPDATE_DEVICES_SUBDIR* directory name for iot devices
-- *UPDATE_DEVICES_LIST* list of device for *provisioning* script
+- *UPDATE_DEVICES_LIST* list of devices for *provisioning* script
 - *FS_PROVISIONING_IOTHUB* prefix of IOT Hub URL for configuration
-- *FS_PROVISIONING_DPS_IDSCOPE* id scope of device provisiong service for configuration
+- *FS_PROVISIONING_DPS_IDSCOPE* id scope of device provisioning service for configuration
 - *APPLICATION_VERSION* application version.
 - *APPLICATION_CONTAINER_NAME* name of application container
 - *FIRMWARE_VERSION* firmware version
 - *MANIFEST_PROVIDER* manifest provider for Azure manifest
 - *MANIFEST_UPDATE_NAME* update name for Azure manifest
-- *MANIFEST_FW_UPDATE_VERSION firmware update version for Azure manifest
+- *MANIFEST_FW_UPDATE_VERSION* firmware update version for Azure manifest
 - *MANIFEST_APP_UPDATE_VERSION* application update version for Azure manifest
-- *MANIFEST_DEVICE_MOD* device modell for azure Manifest
+- *MANIFEST_DEVICE_MOD* device model for Azure manifest
 - *ADUC_DOWNLOADS_DIR* download directory for update agent
 
