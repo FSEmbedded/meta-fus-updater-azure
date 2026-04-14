@@ -1,6 +1,6 @@
 # Build and install the fs-provisioning-client
 
-DESCRIPTION = "F&S Provsioning Client Azure IoT SDKs and libraries for C"
+DESCRIPTION = "F&S Provisioning Client Azure IoT SDKs and libraries for C"
 AUTHOR = "F&S Elektronik Systeme GmbH"
 HOMEPAGE = "https://github.com/Azure/azure-iot-sdk-c"
 LICENSE = "MIT"

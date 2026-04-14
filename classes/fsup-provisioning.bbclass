@@ -1,4 +1,4 @@
-# F&S provisiong functions to create certificates
+# F&S provisioning functions to create certificates
 # and create device on azure iothub
 
 inherit fsup-provisioning-defaults
