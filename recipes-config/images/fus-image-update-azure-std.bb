@@ -24,6 +24,9 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     adu-agent-service \
 "
 
+# Development only — ships test signing keys, replace for production
+# CORE_IMAGE_EXTRA_INSTALL += "adu-pub-key"
+
 TOOLCHAIN_TARGET_TASK:append  = " boost boost-dev"
 TOOLCHAIN_TARGET_TASK:append  = " cpprest cpprest-dev"
 TOOLCHAIN_TARGET_TASK:append  = " libproxy libproxy-dev"
