@@ -42,6 +42,7 @@ RDEPENDS:${PN} += "bash adu-log-dir deliveryoptimization-agent-service curl open
 
 inherit cmake useradd
 require includes/adu_paths.inc
+require includes/adu_users.inc
 
 BUILD_TYPE ?= "Release"
 EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
@@ -97,17 +98,11 @@ ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloa
 ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
 ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
 
-
-ADUUSER = "adu"
-ADUGROUP = "adu"
-DOUSER = "do"
-DOGROUP = "do"
-
 USERADD_PACKAGES = "${PN}"
 
 GROUPADD_PARAM:${PN} = "\
-    --gid 800 --system adu ; \
-    --gid 801 --system do ; \
+    --gid ${ADU_GID} --system ${ADUGROUP} ; \
+    --gid ${DO_GID} --system ${DOGROUP} ; \
     "
 
 # USERADD_PARAM specifies command line options to pass to the
@@ -117,8 +112,8 @@ GROUPADD_PARAM:${PN} = "\
 # To download the update payload file, 'adu' user must be a member of 'do' group.
 # To save downloaded file into 'adu' downloads directory, 'do' user must be a member of 'adu' group.
 USERADD_PARAM:${PN} = "\
-    --uid 800 --system -g ${ADUGROUP} -G ${DOGROUP} --no-create-home --shell /bin/false ${ADUUSER} ; \
-    --uid 801 --system -g ${DOGROUP} -G ${ADUGROUP} --no-create-home --shell /bin/false ${DOUSER} ; \
+    --uid ${ADU_UID} --system -g ${ADUGROUP} -G ${DOGROUP} --no-create-home --shell /bin/false ${ADUUSER} ; \
+    --uid ${DO_UID} --system -g ${DOGROUP} -G ${ADUGROUP} --no-create-home --shell /bin/false ${DOUSER} ; \
     "
 
 do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
@@ -134,8 +129,6 @@ do_configure:append() {
 INSANE_SKIP:${PN} += "empty-dirs"
 
 do_install:append() {
-
-    rm -rf ${D}/var/volatile
 
     #create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}
@@ -169,18 +162,24 @@ do_install:append() {
     chmod 0770 ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
 
     #create ADUC_CONF_DIR
+    # Match upstream Azure/iot-hub-device-update Debian postinst:
+    # adu:adu 0750 — also matches libaducpal ADUC_FILE_USER/GROUP defaults
+    # that CheckConfDirOwnershipAndPermissions enforces at health check.
     install -d ${D}${ADUC_CONF_DIR}
-    chown root:${ADUGROUP} ${D}${ADUC_CONF_DIR}
+    chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONF_DIR}
     chmod 0750 ${D}${ADUC_CONF_DIR}
 
-    #create ADUC_LOG_DIR
-    install -d ${D}${ADUC_LOG_DIR}
-    chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_LOG_DIR}
-    chmod 0774 ${D}${ADUC_LOG_DIR}
-
-    # tmpfiles.d entry for downloads directory — works for both
-    # volatile (/tmp) and persistent (/var/lib) paths
+    # tmpfiles.d entries
     install -d ${D}${sysconfdir}/tmpfiles.d
+
+    # Re-assert /etc/adu ownership and mode on every boot so overlay-upper
+    # drift (e.g. stale dir from an older image) cannot shadow the rootfs
+    # lower layer and break the agent's health check.
+    echo "d ${ADUC_CONF_DIR} 0750 ${ADUUSER} ${ADUGROUP} - -" \
+        > ${D}${sysconfdir}/tmpfiles.d/adu-conf-dir.conf
+
+    # Downloads directory — works for both volatile (/tmp) and
+    # persistent (/var/lib) paths
     echo "d ${ADUC_DOWNLOADS_DIR} 0770 ${ADUUSER} ${ADUGROUP} - -" \
         > ${D}${sysconfdir}/tmpfiles.d/adu-downloads.conf
 
@@ -247,6 +246,7 @@ addtask do_registerAgentExtensions_permissions after do_registerAgentExtensions 
 FILES:${PN} += " \
     ${bindir}/AducIotAgent \
     ${bindir}/adu-shell \
+    ${sysconfdir}/tmpfiles.d/adu-conf-dir.conf \
     ${sysconfdir}/tmpfiles.d/adu-downloads.conf \
     ${ADUC_DATA_DIR} \
     ${ADUC_CONF_DIR} \
