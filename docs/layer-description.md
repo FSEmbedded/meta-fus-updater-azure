@@ -3,7 +3,7 @@
 ### classes/fsup-provisioning.bbclass:
 
 Extends build process to create manifests for update images, creates X509 certificates and
-register set of devices on azure provisioning service.
+registers a set of devices on azure provisioning service.
 
 The build process starts the functions in image post process
 - **create_update_manifest_images** task creates manifests for Azure Cloud.
@@ -20,9 +20,13 @@ The build process starts the functions in image post process
 
 Ensures that the build system uses correct paths and priority to find and
 process the recipes and metadata in the layer.
-- compatible: kirkstone
+- compatible: kirkstone, scarthgap
 - priority: 11
 
+### includes/adu_paths.inc:
+
+Central definition for all ADU directory paths used across recipes.
+Weak assignments allow distro/machine overrides.
 
 ### recipes-application/*:
 
@@ -50,7 +54,7 @@ Provides azure device update agent with additional required packages and artifac
   delivery optimization simple client.
 - *deliveryoptimization-agent-service* installs and configures
   the delivery optimization agent service
-- *deliveryoptimization-agent-sdk* build and install the
+- *deliveryoptimization-sdk* build and install the
   delivery optimization client CPP SDK.
 
 ### recipes-azure-iot/*:
@@ -71,11 +75,11 @@ Description of *fus-image-update-azure-std* image
 
 ### recipes-devtools/*:
 
-Build addtional library abseil-cpp. Used by telemetry package.
+Build additional library abseil-cpp. Used by telemetry package.
 
 ### recipes-dynamic_overlay/*:
 
-Confugures additional parameter for cmake to add secure
+Configures additional parameter for cmake to add secure
 partition support.
 
 ### recipes-msft-gsl/*:

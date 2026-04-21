@@ -16,7 +16,7 @@ E.g.
 
 - [root] directory
   - *addfsheader* - help script to create fus header
-  - *fus_prov_dps_client* - fus provisiong client
+  - *fus_prov_dps_client* - fus provisioning client
   - *provisioning* - main script to create certificates and
     register device by Azure Device Provisioning Service (DPS).
   - *template-du-config.json* - template for device configuration.
@@ -81,7 +81,7 @@ E.g. configuration file for device name *dev01*
     ],
     "manufacturer": "FUS",
     "model": "fsimx8mp",
-    "downloadsFolder": "/tmp/adu",
+    "downloadsFolder": "/tmp/downloads",
     "agents": [
       {
         "name": "fus/update",

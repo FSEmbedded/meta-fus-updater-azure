@@ -3,7 +3,7 @@
 The layer **meta-fus-updater-azure** is a extension for **meta-fus-updater** layer
 and adds over the air update (OTA) from Microsoft Azure Cloud.
 
-## Overview - Suppored architecture
+## Overview - Supported architecture
 
 See readme from **meta-fus-updater** layer.
 
