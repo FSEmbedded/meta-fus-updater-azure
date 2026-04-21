@@ -45,7 +45,7 @@ Provides azure device update agent with additional required packages and artifac
    and deploy it to */etc/ directory.
 - *adu-hw-compat* generates ADU hardware compatibility info file
   and deploy it to */etc* directory
-- *adu-log-dir* generates new */tmp/adu* directory for ADU log files
+- *adu-log-dir* generates new *ADUC_LOG_DIR* directory for ADU log files
 - *adu-pub-key* generates and copies/installs the public key
   .pem file used to validate the signatures of images.
 - *azure-device-update* build and install device update agent and
