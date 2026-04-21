@@ -12,7 +12,8 @@ ADUC_DU_CONFIG      ?= "${ADUC_CONF_DIR}/du-config.json"
 
 # Runtime data directory
 ADUC_DATA_DIR       ?= "/var/lib/adu"
-ADUC_DOWNLOADS_DIR  ?= "/tmp/downloads"
+ADUC_WORK_DIR       ?= "/tmp/adu"
+ADUC_DOWNLOADS_DIR  ?= "${ADUC_WORK_DIR}/downloads"
 ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
 
 # Log directory

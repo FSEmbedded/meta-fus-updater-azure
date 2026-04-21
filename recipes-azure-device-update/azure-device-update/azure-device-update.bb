@@ -171,17 +171,15 @@ do_install:append() {
 
     # tmpfiles.d entries
     install -d ${D}${sysconfdir}/tmpfiles.d
+    # Create tmpfiles config
+    printf '%s\n' \
+    "# Ensure correct ownership/permissions to avoid overlayfs drift issues" \
+    "" \
+    "d ${ADUC_CONF_DIR} 0750 ${ADUUSER} ${ADUGROUP} - -" \
+    "d ${ADUC_DOWNLOADS_DIR} 0770 ${ADUUSER} ${ADUGROUP} - -" \
+    "d ${ADUC_WORK_DIR} 0760 ${ADUUSER} ${ADUGROUP} - -" \
+    > ${D}${sysconfdir}/tmpfiles.d/adu.conf
 
-    # Re-assert /etc/adu ownership and mode on every boot so overlay-upper
-    # drift (e.g. stale dir from an older image) cannot shadow the rootfs
-    # lower layer and break the agent's health check.
-    echo "d ${ADUC_CONF_DIR} 0750 ${ADUUSER} ${ADUGROUP} - -" \
-        > ${D}${sysconfdir}/tmpfiles.d/adu-conf-dir.conf
-
-    # Downloads directory — works for both volatile (/tmp) and
-    # persistent (/var/lib) paths
-    echo "d ${ADUC_DOWNLOADS_DIR} 0770 ${ADUUSER} ${ADUGROUP} - -" \
-        > ${D}${sysconfdir}/tmpfiles.d/adu-downloads.conf
 
     install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${bindir}
     chown ${ADUUSER}:${ADUGROUP} ${D}${bindir}/adu-swupdate.sh
