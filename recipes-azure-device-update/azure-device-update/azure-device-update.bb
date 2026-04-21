@@ -1,22 +1,17 @@
-# Build and install our ADU sample code.
-
-# Environment variables that can be used to configure the behavior of this recipe.
-# ADUC_GIT_URL          Changes the URL of github repository that ADU code is pulled from.
-#                           Default: git://github.com/Azure/iot-hub-device-update
-#
-# ADUC_GIT_BRANCH       Changes the branch that ADU code is pulled from.
-#                           Default: develop
-#
-# ADU_GIT_COMMIT        Changes to the commit from which to checkout the adu code.
-#
-# BUILD_TYPE            Changes the type of build produced by this recipe.
-#                       Valid values are Debug, Release, RelWithDebInfo, and MinRelSize.
-#                       These values are the same as the CMAKE_BUILD_TYPE variable.
 # Copyright (C) 2024 F&S Elektronik Systeme GmbH
 # Released under the GPLv2 license
+#
+# Build and install the F&S Azure Device Update agent.
+#
+# ADU_SRC_URI           Git repository URL for the ADU source.
+# ADU_GIT_BRANCH        Branch to checkout. Default: master
+# ADU_GIT_COMMIT        Commit hash to pin. Default: see SRCREV below.
+# BUILD_TYPE            CMake build type: Debug, Release, RelWithDebInfo, MinRelSize.
+
+SUMMARY = "F&S Azure Device Update agent"
+DESCRIPTION = "Azure Device Update agent with F&S update handler integration."
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
-DESCRIPTION = "azure-device-update"
 
 ADU_GIT_BRANCH ?= "master"
 ADU_SRC_URI ?= "git://github.com/FSEmbedded/fus-device-update-azure.git"
@@ -43,11 +38,12 @@ DEPENDS = "\
     deliveryoptimization-sdk \
     libxml2 \
     pkgconfig-native \
-    cmake-native"
+"
 
-RDEPENDS:${PN} += "bash adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
+RDEPENDS:${PN} += "bash adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 
 inherit cmake useradd
+require includes/adu_paths.inc
 
 BUILD_TYPE ?= "Release"
 EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
@@ -66,8 +62,8 @@ EXTRA_OECMAKE += "-DADUC_VERSION_FILE=${sysconfdir}/adu-version"
 # Use zlog as the logging library.
 EXTRA_OECMAKE += "-DADUC_LOGGING_LIBRARY=zlog"
 # Change the log directory.
-EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=/adu/logs"
-# Enable automatic serivce start
+EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=${ADUC_LOG_DIR}"
+# Enable automatic service start
 EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=ON"
 # Do not build unit tests
 EXTRA_OECMAKE += "-DADUC_BUILD_UNIT_TESTS:BOOL=false"
@@ -75,9 +71,9 @@ EXTRA_OECMAKE += "-DADUC_BUILD_UNIT_TESTS:BOOL=false"
 EXTRA_OECMAKE += "-DADUC_BUILD_PACKAGES:BOOL=false"
 # Do not generate documentation for source code
 EXTRA_OECMAKE += "-DADUC_BUILD_DOCUMENTATION:BOOL=false"
-# Use /adu directory for configuration.
-# The /adu directory is on a seperate partition and is not updated during an OTA update.
-EXTRA_OECMAKE += "-DADUC_CONF_FOLDER:STRING=/adu"
+# Use centralized ADU configuration directory.
+# On persistent partition, survives OTA updates.
+EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=${ADUC_CONF_DIR}"
 # cpprest installs its config.cmake file in a non-standard location.
 # Tell cmake where to find it.
 EXTRA_OECMAKE += "-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake"
@@ -86,29 +82,22 @@ EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 # Set correct sysroot path for the AUDC_LIBRARY_DIR variable
 # EXTRA_OECMAKE += "-DADUC_LIBRARY_DIR=${STAGING_DIR_TARGET}"
 
-EXTRA_OECMAKE += "-DUPDATER_CLI_FULL_CMD='/usr/sbin/fs-updater'"
-EXTRA_OECMAKE += "-DADUC_BUILD_PACKAGES:BOOL=false"
+EXTRA_OECMAKE += "-DUPDATER_CLI_FULL_CMD='${sbindir}/fs-updater'"
 EXTRA_OECMAKE += "-Duse_ms_default_handler=ON"
 EXTRA_OECMAKE += "-Duse_fsup_app_handler=OFF"
 EXTRA_OECMAKE += "-Duse_fsup_fw_handler=OFF"
 EXTRA_OECMAKE += "-Duse_fsup_update_handler=ON"
 
 # bash - for running shell scripts for install.
-# adu-pub-key - to install public key for update package verification.
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
 
-ADUC_DATA_DIR ?= "/var/lib/adu"
-ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
+# Extension subdirectories (recipe-specific, derived from adu_paths.inc)
 ADUC_EXTENSIONS_INSTALL_DIR ?= "${ADUC_EXTENSIONS_DIR}/sources"
 ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/component_enumerator"
 ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloader"
 ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
 ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
-ADUC_DOWNLOADS_DIR ?= "${ADUC_DATA_DIR}/downloads"
-
-ADUC_LOG_DIR ?= "/adu/logs"
-ADUC_CONF_DIR ?= "/adu"
 
 
 ADUUSER = "adu"
@@ -144,7 +133,13 @@ do_configure:append() {
     fi
 }
 
+INSANE_SKIP:${PN} += "empty-dirs"
+
 do_install:append() {
+
+    find ${D}/var/volatile || true
+    rm -rf ${D}/var/volatile
+
     #create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}
     chgrp ${ADUGROUP} ${D}${ADUC_DATA_DIR}
@@ -202,7 +197,7 @@ do_install:append() {
     chmod u+s ${D}${bindir}/adu-shell
     # remove deployment from project deamons
     # use adu-service recipe
-    rm -rf ${D}/usr/lib
+    rm -rf ${D}${libdir}
     # copy scripts to create manifest files
     install -d ${WORKDIR}/iot_hub_scripts
     cp -rf ${S}/tools/AduCmdlets/*.* ${WORKDIR}/iot_hub_scripts/
@@ -251,11 +246,19 @@ fakeroot do_registerAgentExtensions_permissions(){
 do_registerAgentExtensions[depends] += "virtual/fakeroot-native:do_populate_sysroot"
 addtask do_registerAgentExtensions_permissions after do_registerAgentExtensions before do_package
 
-FILES:${PN} += "${bindir}/AducIotAgent"
-FILES:${PN} += "${bindir}/adu-shell"
-FILES:${PN} += "${ADUC_DATA_DIR}/* ${ADUC_LOG_DIR}/* ${ADUC_CONF_DIR}/*"
-FILES:${PN} += "${ADUC_EXTENSIONS_DIR}/* ${ADUC_EXTENSIONS_INSTALL_DIR}/* ${ADUC_DOWNLOADS_DIR}/*"
-FILES:${PN} += "${ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR}/* ${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR}/* ${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}/* ${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}/*"
+FILES:${PN} += " \
+    ${bindir}/AducIotAgent \
+    ${bindir}/adu-shell \
+    ${ADUC_DATA_DIR} \
+    ${ADUC_CONF_DIR} \
+    ${ADUC_EXTENSIONS_DIR} \
+    ${ADUC_EXTENSIONS_INSTALL_DIR} \
+    ${ADUC_DOWNLOADS_DIR} \
+    ${ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR} \
+    ${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR} \
+    ${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR} \
+    ${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR} \
+"
 
 def create_handlerRegistration(handlerId, handlerFileInstallPath, handlerExtensionDir, handlerRegistrationFileName, workDir):
     import hashlib
