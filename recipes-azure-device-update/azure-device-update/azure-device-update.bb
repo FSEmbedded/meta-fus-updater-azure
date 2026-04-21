@@ -168,11 +168,6 @@ do_install:append() {
     chgrp ${ADUGROUP} ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
     chmod 0770 ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
 
-    #create ADUC_DOWNLOADS_DIR
-    install -d ${D}${ADUC_DOWNLOADS_DIR}
-    chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_DOWNLOADS_DIR}
-    chmod 0770 ${D}${ADUC_DOWNLOADS_DIR}
-
     #create ADUC_CONF_DIR
     install -d ${D}${ADUC_CONF_DIR}
     chown root:${ADUGROUP} ${D}${ADUC_CONF_DIR}
@@ -182,6 +177,12 @@ do_install:append() {
     install -d ${D}${ADUC_LOG_DIR}
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_LOG_DIR}
     chmod 0774 ${D}${ADUC_LOG_DIR}
+
+    # tmpfiles.d entry for downloads directory — works for both
+    # volatile (/tmp) and persistent (/var/lib) paths
+    install -d ${D}${sysconfdir}/tmpfiles.d
+    echo "d ${ADUC_DOWNLOADS_DIR} 0770 ${ADUUSER} ${ADUGROUP} - -" \
+        > ${D}${sysconfdir}/tmpfiles.d/adu-downloads.conf
 
     install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${bindir}
     chown ${ADUUSER}:${ADUGROUP} ${D}${bindir}/adu-swupdate.sh
@@ -246,11 +247,11 @@ addtask do_registerAgentExtensions_permissions after do_registerAgentExtensions 
 FILES:${PN} += " \
     ${bindir}/AducIotAgent \
     ${bindir}/adu-shell \
+    ${sysconfdir}/tmpfiles.d/adu-downloads.conf \
     ${ADUC_DATA_DIR} \
     ${ADUC_CONF_DIR} \
     ${ADUC_EXTENSIONS_DIR} \
     ${ADUC_EXTENSIONS_INSTALL_DIR} \
-    ${ADUC_DOWNLOADS_DIR} \
     ${ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR} \
     ${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR} \
     ${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR} \
