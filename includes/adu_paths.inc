@@ -6,7 +6,7 @@
 
 # Configuration directory (on persistent partition, survives OTA)
 ADUC_CONF_DIR       ?= "/etc/adu"
-ADUC_CERT_DIR       ?= "${ADUC_CONF_DIR}/certs"
+# Cert store directory — tmpfs mount point; archive is extracted here.
 ADUC_X509_DIR       ?= "${ADUC_CONF_DIR}/x509_c"
 ADUC_DU_CONFIG      ?= "${ADUC_CONF_DIR}/du-config.json"
 
@@ -17,6 +17,3 @@ ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
 
 # Log directory
 ADUC_LOG_DIR        ?= "/var/log/adu"
-
-# Public key directory for update package verification
-ADUC_KEY_DIR        ?= "/adukey"

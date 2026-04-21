@@ -3,6 +3,7 @@
 
 inherit fsup-provisioning-defaults
 inherit fus-updater-defaults
+require includes/adu_paths.inc
 
 # add data dir for second rw partition
 create_device_certificate() {
@@ -21,6 +22,7 @@ create_device_certificate() {
     export MANIFEST_PROVIDER="${MANIFEST_PROVIDER}"
     export MANIFEST_DEVICE_MOD="${MANIFEST_DEVICE_MOD}"
     export ADUC_DOWNLOADS_DIR="${ADUC_DOWNLOADS_DIR}"
+    export ADUC_X509_DIR="${ADUC_X509_DIR}"
 
     # log fsup env. block
     bbdebug 1 ""

@@ -2,7 +2,7 @@
     "logComponents":[
        {
              "componentName":"adu",
-             "logPath":"/var/log/iot-hub-device-update"
+             "logPath":"/var/log/adu/"
        },
        {
              "componentName":"do",
