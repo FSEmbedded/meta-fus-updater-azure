@@ -80,11 +80,11 @@ partition support.
 
 ### recipes-msft-gsl/*:
 
-Build telemetry integration.
+Build and install the Microsoft Guidelines Support Library (GSL).
 
 ### recipes-opentelemetry-cpp/*:
 
-Build and install the Microsoft GSL library
+Build and install the OpenTelemetry C++ client library
 
 ### wic/*:
 

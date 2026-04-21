@@ -19,8 +19,6 @@ SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
 ADU_GIT_COMMIT ?= "d11d7e6e0ba9ad0e115d3a46d397f9f7277dc72f"
 
-SRC_URI[sha256sum] ?= "4fc5e721e628c5c862c5b1d8d4645e5a408003c638aa4e2ef9f41541c60d068d"
-
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRCREV = "${ADU_GIT_COMMIT}"
@@ -137,7 +135,6 @@ INSANE_SKIP:${PN} += "empty-dirs"
 
 do_install:append() {
 
-    find ${D}/var/volatile || true
     rm -rf ${D}/var/volatile
 
     #create ADUC_DATA_DIR
