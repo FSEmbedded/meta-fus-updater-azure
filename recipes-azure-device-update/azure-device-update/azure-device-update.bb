@@ -98,6 +98,10 @@ ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloa
 ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
 ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
 
+# Directory (outside ${D}) where the stripped-out debug symbols are collected in
+# do_install and exported to DEPLOY_DIR_IMAGE in do_deploy. Not part of the rootfs.
+DEBUGSYM_DIR ?= "${WORKDIR}/adu-debug-symbols"
+
 USERADD_PACKAGES = "${PN}"
 
 GROUPADD_PARAM:${PN} = "\
@@ -184,6 +188,22 @@ do_install:append() {
     install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${bindir}
     chown ${ADUUSER}:${ADUGROUP} ${D}${bindir}/adu-swupdate.sh
 
+    # --- Save debug symbols, then strip, BEFORE do_registerAgentExtensions ---
+    # do_registerAgentExtensions records sha256+size of the extension .so files into
+    # content_handler.json. Because INHIBIT_PACKAGE_STRIP disables the automatic strip in
+    # do_package, we strip here (do_install runs before that task) so the deployed, stripped
+    # files still match their registered hashes. Exported handler symbols live in .dynsym and
+    # survive --strip-unneeded, so dlopen/dlsym keep working; the .note.gnu.build-id is kept so
+    # gdb can match a field core dump to the saved .debug archive.
+    # adu-shell is stripped here too (loop runs before the chmod u+s below, which re-sets SUID).
+    install -d ${DEBUGSYM_DIR}
+    for f in $(find ${D}${ADUC_EXTENSIONS_INSTALL_DIR} -name '*.so' 2>/dev/null) \
+             ${D}${bindir}/AducIotAgent ${D}${bindir}/adu-shell ; do
+        [ -f "$f" ] || continue
+        ${OBJCOPY} --only-keep-debug "$f" ${DEBUGSYM_DIR}/$(basename "$f").debug
+        ${STRIP} --strip-unneeded "$f"
+    done
+
     #set owner for adu-shell
     chmod 0550 ${D}${bindir}/adu-shell
     chown root:${ADUGROUP} ${D}${bindir}/adu-shell
@@ -202,6 +222,11 @@ do_deploy() {
     mkdir -p ${DEPLOY_DIR_IMAGE}/iot_hub_scripts
     # copy fs-provisioning dir to deploy directory
     cp -rf ${WORKDIR}/iot_hub_scripts/*.* ${DEPLOY_DIR_IMAGE}/iot_hub_scripts/
+
+    # export the stripped-out debug symbols (kept out of the rootfs/package).
+    # gdb matches them to a field core dump via the binaries' .note.gnu.build-id.
+    install -d ${DEPLOY_DIR_IMAGE}/adu-debug-symbols
+    cp -f ${DEBUGSYM_DIR}/*.debug ${DEPLOY_DIR_IMAGE}/adu-debug-symbols/ 2>/dev/null || true
 }
 
 addtask deploy after do_install
