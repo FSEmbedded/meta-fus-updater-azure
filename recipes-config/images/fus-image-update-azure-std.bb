@@ -47,7 +47,7 @@ create_fake_certsfs () {
     fi
 }
 
-IMAGE_PREPROCESS_COMMAND += "create_fake_certsfs; "
+IMAGE_PREPROCESS_COMMAND += "create_fake_certsfs"
 
 fsup_certs_clean () {
     # remove fsupdate template

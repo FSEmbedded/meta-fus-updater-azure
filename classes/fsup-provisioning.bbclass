@@ -158,7 +158,7 @@ create_update_manifest_images() {
             ${fsup_images_dir}/${manifest_provider}.${manifest_up_name}-common-app.${now}.importmanifest.json
 }
 
-IMAGE_POSTPROCESS_COMMAND += "create_update_manifest_images; create_device_certificate; "
+IMAGE_POSTPROCESS_COMMAND += "create_update_manifest_images create_device_certificate"
 
 # remove all created manifests
 fsup_manifest_clean () {
