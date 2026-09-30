@@ -1,47 +1,47 @@
 # Microsoft Azure IoT SDKs and libraries for C
 
-The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with Azure IoT Hub, Azure IoT Central and to Azure IoT Device Provisioning.
+The Azure IoT Hub Device SDK allows applications written in C99 or later, or in C++, to communicate easily with Azure IoT Hub, Azure IoT Central and Azure IoT Device Provisioning.
 
+## Integration of FSUP Framework
 
-### Integration of FSUP Framework
-
-FSUP Framework extends provisioning client to use custom X509 certificates. For this device certificates would be created. The *fus_prov_dps_client* uses X509 certificates to connect to Azure Provisioning service and to register
+The FSUP framework extends the provisioning client to use custom X.509 certificates and creates a device certificate for every device. The *fus_prov_dps_client* uses X.509 certificates to connect to the Azure Device Provisioning Service and to register
 devices for a given group.
 
-The framework offers a set of tools, scripts and configuration files to create certificates and configuration files. All files and scripts can be found in *<build dir>/tmp/deploy/images/<architecture>/fs-provisioning* directory.
+The framework offers a set of tools, scripts and configuration files to create certificates and device configurations. All files and scripts can be found in the *&lt;build dir&gt;/tmp/deploy/images/&lt;architecture&gt;/fs-provisioning* directory.
 
-### Directory overview fs-provisioning
+## Directory overview of fs-provisioning
 
-E.g.
+For example:
 
 - [root] directory
-  - *addfsheader* - help script to create fus header
-  - *fus_prov_dps_client* - fus provisioning client
-  - *provisioning* - main script to create certificates and
-    register device by Azure Device Provisioning Service (DPS).
-  - *template-du-config.json* - template for device configuration.
-    Is used by provisioning script to create certs.fs binary for
-    device "Secure" partition
-
+  - *fus_prov_dps_client* - provisioning client
+  - *provisioning.sh* - main script to create certificates and
+    register devices with the Azure Device Provisioning Service (DPS).
+    It calls *addfsheader.sh*, which *meta-fus-updater* provides with the
+    recipe *fus-installscript-native*; it must be in the PATH
+  - *template-du-config.json* - template for the device configuration.
+    Used by the provisioning script to create the certs.fs binary for
+    the device's "Secure" partition
 - [x509] directory
-    - is a copy of "[azure-iot-sdk-c]/tools/AduCmdlets" directory.
-      Use *certGen* script and *openssl_root_ca.cnf*, *openssl_device_intermediate_ca.cnf* to generate openssl certificates
-- [name of architecture] directory
-    - <certs> folder with root and intermediate ca
-    - <devices> folder with device ca
-    - ...
+  - a copy of the "[azure-iot-sdk-c]/tools/CACertificates" directory.
+    Use the *certGen.sh* script with *openssl_root_ca.cnf* and *openssl_device_intermediate_ca.cnf* to generate the certificates
+- [FS_PROVISIONING_UPDATE_DEVICES_SUBDIR] directory, default *fus-devices*
+  - *certs* folder with the root, intermediate and device certificates
+  - *private* folder with the private keys
+  - *devices* folder with one *x509_c* directory per device
+  - ...
 
-# Device binaries
+## Device binaries
 
-For every listed device in *UPDATE_DEVICES_LIST* env. the function
-**create_device_certificate** creates certificates and configuration file
-du-config.json. Both are part of certs.fs
+For every device listed in *UPDATE_DEVICES_LIST*, the function
+**create_device_certificate** creates the certificates and the configuration file
+du-config.json. Both are part of certs.fs.
 
-Configuration file is used by device update agent to get information about iot hub, certificate type and keys.
+The device update agent reads the configuration file to get the IoT hub, the certificate type and the keys.
 
 **template-du-config.json**
 
-```json
+```text
 {
     "schemaVersion": "1.1",
     "aduShellTrustedUsers": [
@@ -71,7 +71,7 @@ Configuration file is used by device update agent to get information about iot h
     ]
 }
 ```
-E.g. configuration file for device name *dev01*
+Example configuration file for the device *dev01*:
 ```json
 {
     "schemaVersion": "1.1",
@@ -103,24 +103,22 @@ E.g. configuration file for device name *dev01*
 }
 ```
 
+## Environment variables
 
-### Environments
+The following variables can be adapted for the build process:
 
-For the build process following environments can be adapted:
-
-- *FS_PROVISIONING_SERVICE_DIR_NAME* directory name of provisioning service
-- *FS_PROVISIONING_UPDATE_DEVICES_SUBDIR* directory name for iot devices
-- *UPDATE_DEVICES_LIST* list of devices for *provisioning* script
-- *FS_PROVISIONING_IOTHUB* prefix of IOT Hub URL for configuration
-- *FS_PROVISIONING_DPS_IDSCOPE* id scope of device provisioning service for configuration
-- *APPLICATION_VERSION* application version.
-- *APPLICATION_CONTAINER_NAME* name of application container
+- *FS_PROVISIONING_SERVICE_DIR_NAME* directory name of the provisioning service
+- *FS_PROVISIONING_UPDATE_DEVICES_SUBDIR* directory name for IoT devices
+- *UPDATE_DEVICES_LIST* list of devices for the *provisioning.sh* script
+- *FS_PROVISIONING_IOTHUB* prefix of the IoT Hub URL for the configuration
+- *FS_PROVISIONING_DPS_IDSCOPE* ID scope of the device provisioning service for the configuration
+- *APPLICATION_VERSION* application version
+- *APPLICATION_CONTAINER_NAME* name of the application container
 - *FIRMWARE_VERSION* firmware version
-- *MANIFEST_PROVIDER* manifest provider for Azure manifest
-- *MANIFEST_UPDATE_NAME* update name for Azure manifest
-- *MANIFEST_FW_UPDATE_VERSION* firmware update version for Azure manifest
-- *MANIFEST_APP_UPDATE_VERSION* application update version for Azure manifest
-- *MANIFEST_DEVICE_MOD* device model for Azure manifest
+- *MANIFEST_PROVIDER* manifest provider for the Azure manifest
+- *MANIFEST_UPDATE_NAME* update name for the Azure manifest
+- *MANIFEST_FW_UPDATE_VERSION* firmware update version for the Azure manifest
+- *MANIFEST_APP_UPDATE_VERSION* application update version for the Azure manifest
+- *MANIFEST_DEVICE_MOD* device model for the Azure manifest
 - *ADUC_DOWNLOADS_DIR* download directory for the update agent, default "/tmp/adu/downloads".
   Dynamic overlay is built with the same value, see [dynamic-overlay.md](dynamic-overlay.md).
-

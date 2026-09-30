@@ -1,99 +1,99 @@
 ## Description of the meta-fus-updater-azure layer
 
-### classes/fsup-provisioning.bbclass:
+### classes/fsup-provisioning.bbclass
 
-Extends build process to create manifests for update images, creates X509 certificates and
-registers a set of devices on azure provisioning service.
+Extends the build process to create manifests for update images, create X.509 certificates and
+register a set of devices with the Azure Device Provisioning Service.
 
-The build process starts the functions in image post process
+The build process runs these functions as image postprocess commands:
 - **create_update_manifest_images** task creates manifests for Azure Cloud.
   Required to deploy update images.
-- **create_device_certificate** task creates X509 certificates
-  and register devices on azure provisioning service
-  They are following X509 certificates types
-  - *root* are certificates for the azure provisioning service
-    like root or intermediate.
-  - *device* are certificates for iot devices. E.g. blob certs.fs
-    must be available on the iot device to communicate with Azure Cloud.
+- **create_device_certificate** task creates X.509 certificates
+  and registers devices with the Azure Device Provisioning Service.
+  There are the following X.509 certificate types:
+  - *root* are certificates for the Azure Device Provisioning Service,
+    such as root or intermediate certificates.
+  - *device* are certificates for IoT devices. They are packed into the
+    certs.fs blob, which must be available on the IoT device to communicate with Azure Cloud.
 
-### conf/layer.conf:
+### conf/layer.conf
 
-Ensures that the build system uses correct paths and priority to find and
+Ensures that the build system uses the correct paths and priority to find and
 process the recipes and metadata in the layer.
 - compatible: kirkstone, scarthgap
 - priority: 11
 
-### includes/adu_paths.inc:
+### includes/adu_paths.inc
 
-Central definition for all ADU directory paths used across recipes.
+Central definition of all ADU directory paths used across recipes.
 Weak assignments allow distro/machine overrides.
 
-### recipes-application/*:
+### recipes-application/*
 
-Extends application configuration to overlay additional directories.
+Extends the application configuration to overlay additional directories.
 
-### recipes-azure-blob-storage-file-upload-utility/*:
+### recipes-azure-blob-storage-file-upload-utility/*
 
-Microsoft Azure package provides the functions necessary to upload files passed to the utility to an Azure Blob Storage account using a SAS url by exposing a C interface.
+A Microsoft Azure package that exposes a C interface to upload the files passed to the utility to an Azure Blob Storage account using a SAS URL.
 
-### recipes-azure-device-update/*:
+### recipes-azure-device-update/*
 
-Provides azure device update agent with additional required packages and artifacts.
-- *adu-agent-service* deploys systemd service for device update
-- *adu-device-info-files* generates additional info files for device update
-   *adu-manufacturer*, *adu-model* and *adu-version*
-   and deploy it to */etc/ directory.
-- *adu-hw-compat* generates ADU hardware compatibility info file
-  and deploy it to */etc* directory
-- *adu-log-dir* generates new *ADUC_LOG_DIR* directory for ADU log files
-- *adu-pub-key* generates and copies/installs the public key
+Provides the Azure device update agent with additional required packages and artifacts.
+- *adu-agent-service* deploys the systemd service for device update
+- *adu-device-info-files* generates additional info files for device update,
+  *adu-manufacturer*, *adu-model* and *adu-version*,
+  and deploys them to the */etc* directory.
+- *adu-hw-compat* generates the ADU hardware compatibility info file
+  and deploys it to the */etc* directory.
+- *adu-log-dir* creates the *ADUC_LOG_DIR* directory for ADU log files.
+- *adu-pub-key* generates and installs the public key
   .pem file used to validate the signatures of images.
-- *azure-device-update* build and install device update agent and
-   *tools/Aducmdlets* scripts to *iot_hub_scripts* directory.
-- *deliveryoptimization-agent* build and install
+- *azure-device-update* builds and installs the device update agent and deploys the
+  *tools/AduCmdlets* scripts to the *iot_hub_scripts* directory.
+- *deliveryoptimization-agent* builds and installs the
   delivery optimization simple client.
 - *deliveryoptimization-agent-service* installs and configures
-  the delivery optimization agent service
-- *deliveryoptimization-sdk* build and install the
-  delivery optimization client CPP SDK.
+  the delivery optimization agent service.
+- *deliveryoptimization-sdk* builds and installs the
+  delivery optimization client C++ SDK.
 
-### recipes-azure-iot/*:
+### recipes-azure-iot/*
 
-- *azure-iot-sdk-c* build and install the azure-iot-sdk-c
+- *azure-iot-sdk-c* builds and installs the azure-iot-sdk-c
   with PnP support.
-- *fs-provisioning-client* creates a client to register
-  iot devices and deploy scripts
-  and configuration files for *create_device_certificate* task.
+- *fs-provisioning-client* builds a client to register
+  IoT devices and deploys the scripts
+  and configuration files for the *create_device_certificate* task.
 
-### recipes-azure-sdk-for-cpp/*:
+### recipes-azure-sdk-for-cpp/*
 
-Build and install the azure-blob-storage-file-upload-utility
+Builds and installs the Microsoft Azure SDK for C++.
 
-### recipes-config/*:
+### recipes-config/*
 
-Description of *fus-image-update-azure-std* image
+Description of the *fus-image-update-azure-std* image.
 
-### recipes-devtools/*:
+### recipes-devtools/*
 
-Build additional library abseil-cpp. Used by telemetry package.
+Adapts the abseil-cpp library, which is used by the OpenTelemetry package.
 
-### recipes-dynamic_overlay/*:
+### recipes-dynamic_overlay/*
 
-Configures additional parameter for cmake to add secure
-partition support.
+Configures additional CMake parameters to add the X.509 certificate
+store on the secure partition, see [dynamic-overlay.md](dynamic-overlay.md).
 
-### recipes-msft-gsl/*:
+### recipes-msft-gsl/*
 
-Build and install the Microsoft Guidelines Support Library (GSL).
+Builds and installs the Microsoft Guidelines Support Library (GSL).
 
-### recipes-opentelemetry-cpp/*:
+### recipes-opentelemetry-cpp/*
 
-Build and install the OpenTelemetry C++ client library
+Builds and installs the OpenTelemetry C++ client library.
 
-### wic/*:
+### wic/*
 
-File to generate sdcard image for eMMC with Azure support.
+File to generate an SD card image for eMMC with Azure support.
 
-### docs/*:
+### docs/*
 
 Documentation in markdown format.

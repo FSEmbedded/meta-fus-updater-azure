@@ -1,32 +1,32 @@
 ## FSUP Framework Device Update
 
-The core component of FSUP framework is extended package *iot-hub-device-update*. The package
-creates a device update client which allows connection to Azure IOT Hub to handle OTA functionality.
+The core component of the FSUP framework is the extended package *iot-hub-device-update*. The package
+creates a device update client which connects to Azure IoT Hub to handle OTA updates.
 
-The device update tool is running in background as daemon. The core tasks are
-- connect to IOT Hub
-- receive property updates when device twin changes
+The device update agent runs in the background as a daemon. Its core tasks are:
+- connect to IoT Hub
+- receive property updates when the device twin changes
 - evaluate "update actions"
 - delegate processing of the metadata to a set of extension plugins
-- reports state changes and result codes by patching the twins
+- report state changes and result codes by patching the device twin
 
-Device update agent can support multiple handler types at the same type. A step handler is an
-extension for specific update type.
+The device update agent can support multiple handler types at the same time. A step handler is an
+extension for a specific update type.
 
 ### fsupdate step handler
 
-FSUPDATE step handler *fsupdate_handler* extends device update agent to handle FSUP framework
-update types. It implements required functions to download, install, apply, check for update functions
-and uses FUS CLI to get specific state or start specific process like image installation.
+The step handler *fsupdate_handler* extends the device update agent to handle FSUP framework
+update types. It implements the functions required to download, install, apply and check for updates,
+and uses the *fs-updater* CLI to query the update state or to start a process such as an image installation.
 
 ### fsupdate adu shell tasks
 
-To use other tools like *apt* adu shell is implemented. The *adu-shell* tool is part of the package and
-has special permissions to create sub processes.
+The *adu-shell* tool runs other tools such as *apt*. It is part of the package and
+has special permissions to create subprocesses.
 
-For the framework fsupdate tasks are added to call *fs-updater* with required argument. This construct allows
-device update agent to call *fs-updater* corresponding to own workflow function without changing of permissions.
+For the framework, fsupdate tasks are added that call *fs-updater* with the required arguments. This allows the
+device update agent to call *fs-updater* from its own workflow functions without changing permissions.
 
-## Help scripts for Azure manifests
+## Helper scripts for Azure manifests
 
-The build process uses scripts from *tools/AduCmdlets* directory to create manifests. The scripts would be installed in deploy process and can be found in *<build dir>/tmp/deploy/images/<architecture>/iot_hub_scripts* directory.
+The build process uses the scripts from the *tools/AduCmdlets* directory to create manifests. The scripts are deployed to the *&lt;build dir&gt;/tmp/deploy/images/&lt;architecture&gt;/iot_hub_scripts* directory.
