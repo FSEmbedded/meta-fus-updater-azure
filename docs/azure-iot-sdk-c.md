@@ -81,7 +81,7 @@ E.g. configuration file for device name *dev01*
     ],
     "manufacturer": "FUS",
     "model": "fsimx8mp",
-    "downloadsFolder": "/tmp/downloads",
+    "downloadsFolder": "/tmp/adu/downloads",
     "agents": [
       {
         "name": "fus/update",
@@ -121,5 +121,6 @@ For the build process following environments can be adapted:
 - *MANIFEST_FW_UPDATE_VERSION* firmware update version for Azure manifest
 - *MANIFEST_APP_UPDATE_VERSION* application update version for Azure manifest
 - *MANIFEST_DEVICE_MOD* device model for Azure manifest
-- *ADUC_DOWNLOADS_DIR* download directory for update agent
+- *ADUC_DOWNLOADS_DIR* download directory for the update agent, default "/tmp/adu/downloads".
+  Dynamic overlay is built with the same value, see [dynamic-overlay.md](dynamic-overlay.md).
 
