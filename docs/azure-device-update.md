@@ -1,6 +1,6 @@
 ## FSUP Framework Device Update
 
-The core component of the FSUP framework is the extended package *iot-hub-device-update*. The package
+The core component of the Azure integration of the FSUP framework is the extended package *iot-hub-device-update*. The package
 creates a device update client which connects to Azure IoT Hub to handle OTA updates.
 
 The device update agent runs in the background as a daemon. Its core tasks are:

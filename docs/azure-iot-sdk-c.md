@@ -28,7 +28,9 @@ For example:
 - [FS_PROVISIONING_UPDATE_DEVICES_SUBDIR] directory, default *fus-devices*
   - *certs* folder with the root, intermediate and device certificates
   - *private* folder with the private keys
-  - *devices* folder with one *x509_c* directory per device
+  - *devices* folder with one directory per device ID, holding *x509_c/* with the
+    device certificate and key, *du-config.json*, *certs.tar.bz2* and *certs.fs*
+    (the image for the device's "Secure" partition)
   - ...
 
 ## Device binaries
@@ -115,10 +117,12 @@ The following variables can be adapted for the build process:
 - *APPLICATION_VERSION* application version
 - *APPLICATION_CONTAINER_NAME* name of the application container
 - *FIRMWARE_VERSION* firmware version
-- *MANIFEST_PROVIDER* manifest provider for the Azure manifest
+- *MANIFEST_PROVIDER* manifest provider for the Azure manifest, also used as
+  *manufacturer* in *du-config.json*
 - *MANIFEST_UPDATE_NAME* update name for the Azure manifest
 - *MANIFEST_FW_UPDATE_VERSION* firmware update version for the Azure manifest
 - *MANIFEST_APP_UPDATE_VERSION* application update version for the Azure manifest
-- *MANIFEST_DEVICE_MOD* device model for the Azure manifest
+- *MANIFEST_DEVICE_MOD* device model for the Azure manifest, also used as
+  *model* in *du-config.json*
 - *ADUC_DOWNLOADS_DIR* download directory for the update agent, default "/tmp/adu/downloads".
   Dynamic overlay is built with the same value, see [dynamic-overlay.md](dynamic-overlay.md).

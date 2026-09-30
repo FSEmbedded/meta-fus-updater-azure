@@ -23,8 +23,8 @@ The layer sets them as follows:
   Set to `${ADUC_DOWNLOADS_DIR}`, default "/tmp/adu/downloads".
 - **PART_NAME_MTD_CERT** is the MTD partition name of the secure data store on NAND.
   Set to "Secure".
-- **EMMC_SECURE_PART_BLK_NR** is the block number of the secure data store on eMMC.
-  Set to "16384".
+- **EMMC_SECURE_PART_BLK_NR** is the start sector (512 bytes) of the secure data store on eMMC.
+  Set to "16384", the 8 MiB offset of the *secure* partition in the wks file.
 
 The `ADUC_*` defaults come from *includes/adu_paths.inc*.
 
