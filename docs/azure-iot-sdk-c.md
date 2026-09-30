@@ -7,7 +7,7 @@ The Azure IoT Hub Device SDK allows applications written in C99 or later, or in 
 The FSUP framework extends the provisioning client to use custom X.509 certificates and creates a device certificate for every device. The *fus_prov_dps_client* uses X.509 certificates to connect to the Azure Device Provisioning Service and to register
 devices for a given group.
 
-The framework offers a set of tools, scripts and configuration files to create certificates and device configurations. All files and scripts can be found in the *&lt;build dir&gt;/tmp/deploy/images/&lt;architecture&gt;/fs-provisioning* directory.
+The framework offers a set of tools, scripts and configuration files to create certificates and device configurations. All files and scripts can be found in the *&lt;build dir&gt;/tmp/deploy/images/&lt;machine&gt;/fs-provisioning* directory.
 
 ## Directory overview of fs-provisioning
 
@@ -26,7 +26,7 @@ For example:
   - a copy of the "[azure-iot-sdk-c]/tools/CACertificates" directory.
     Use the *certGen.sh* script with *openssl_root_ca.cnf* and *openssl_device_intermediate_ca.cnf* to generate the certificates
 - [FS_PROVISIONING_UPDATE_DEVICES_SUBDIR] directory, default *fus-devices*
-  - *certs* folder with the root, intermediate and device certificates
+  - *certs* folder with the root and intermediate certificates
   - *private* folder with the private keys
   - *devices* folder with one directory per device ID, holding *x509_c/* with the
     device certificate and key, *du-config.json*, *certs.tar.bz2* and *certs.fs*
@@ -35,9 +35,10 @@ For example:
 
 ## Device binaries
 
-For every device listed in *UPDATE_DEVICES_LIST*, the function
-**create_device_certificate** creates the certificates and the configuration file
-du-config.json. Both are part of certs.fs.
+If *FS_PROVISIONING_DPS_IDSCOPE* and *FS_PROVISIONING_IOTHUB* are set, the function
+**create_device_certificate** creates, for every device listed in *UPDATE_DEVICES_LIST*,
+the certificates and the configuration file du-config.json. Both are part of certs.fs.
+Otherwise the build only prints a warning.
 
 The device update agent reads the configuration file to get the IoT hub, the certificate type and the keys.
 

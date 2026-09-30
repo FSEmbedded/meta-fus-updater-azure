@@ -6,9 +6,9 @@ Extends the build process to create manifests for update images, create X.509 ce
 register a set of devices with the Azure Device Provisioning Service.
 
 The build process runs these functions as image postprocess commands:
-- **create_update_manifest_images** task creates manifests for Azure Cloud.
+- **create_update_manifest_images** creates manifests for Azure Cloud.
   Required to deploy update images.
-- **create_device_certificate** task creates X.509 certificates
+- **create_device_certificate** creates X.509 certificates
   and registers devices with the Azure Device Provisioning Service.
   There are the following X.509 certificate types:
   - *root* are certificates for the Azure Device Provisioning Service,
@@ -45,7 +45,8 @@ Provides the Azure device update agent with additional required packages and art
   and deploys them to the */etc* directory.
 - *adu-hw-compat* generates the ADU hardware compatibility info file
   and deploys it to the */etc* directory.
-- *adu-log-dir* creates the *ADUC_LOG_DIR* directory for ADU log files.
+- *adu-log-dir* installs a tmpfiles.d rule that creates the *ADUC_LOG_DIR*
+  directory for ADU log files at boot.
 - *adu-pub-key* generates and installs the public key
   .pem file used to validate the signatures of images.
 - *azure-device-update* builds and installs the device update agent and deploys the
@@ -63,7 +64,7 @@ Provides the Azure device update agent with additional required packages and art
   with PnP support.
 - *fs-provisioning-client* builds a client to register
   IoT devices and deploys the scripts
-  and configuration files for the *create_device_certificate* task.
+  and configuration files for the *create_device_certificate* function.
 
 ### recipes-azure-sdk-for-cpp/*
 

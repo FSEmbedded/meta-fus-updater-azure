@@ -1,6 +1,7 @@
 ## FSUP Framework Device Update
 
-The core component of the Azure integration of the FSUP framework is the extended package *iot-hub-device-update*. The package
+The core component of the Azure integration of the FSUP framework is the recipe *azure-device-update*, an extended Azure *iot-hub-device-update*
+fetched from *fus-device-update-azure*. The package
 creates a device update client which connects to Azure IoT Hub to handle OTA updates.
 
 The device update agent runs in the background as a daemon. Its core tasks are:
@@ -29,4 +30,4 @@ device update agent to call *fs-updater* from its own workflow functions without
 
 ## Helper scripts for Azure manifests
 
-The build process uses the scripts from the *tools/AduCmdlets* directory to create manifests. The scripts are deployed to the *&lt;build dir&gt;/tmp/deploy/images/&lt;architecture&gt;/iot_hub_scripts* directory.
+The build process uses the scripts from the *tools/AduCmdlets* directory to create manifests. The scripts are deployed to the *&lt;build dir&gt;/tmp/deploy/images/&lt;machine&gt;/iot_hub_scripts* directory.
