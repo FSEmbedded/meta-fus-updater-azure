@@ -14,7 +14,7 @@ SRC_URI = " \
 
 DEPENDS = "fs-provisioning-client-native"
 
-inherit allarch fsup-provisioning-defaults
+inherit allarch fsup-provisioning-defaults fus-updater-defaults
 require includes/adu_paths.inc
 inherit useradd
 require includes/adu_users.inc
@@ -40,7 +40,7 @@ USERADD_PARAM:${PN} = "\
 BBCLASSEXTEND = "native nativesdk"
 
 do_install() {
-    local prov_service_dir_name=fs-provisioning
+    local prov_service_dir_name=${FS_PROVISIONING_SERVICE_DIR_NAME}
     local provservice=${WORKDIR}/${prov_service_dir_name}
     local du_config=${ADUC_DU_CONFIG}
     install -d ${D}${ADUC_CONF_DIR}
@@ -58,7 +58,7 @@ do_install() {
     sed -i 's|<iothub_suffix>|\"azure-devices.net\"|g' ${D}${du_config}
     sed -i 's|<connection_type>|\"x509\"|g' ${D}${du_config}
     sed -i 's|<connection_data>|\"\"|g' ${D}${du_config}
-    sed -i 's|<name>|\"fs\/fsupdate\"|g' ${D}${du_config}
+    sed -i 's|<name>|\"fus\/update\"|g' ${D}${du_config}
     sed -i 's|<manufacturer>|\"FUS\"|g' ${D}${du_config}
     sed -i 's|<model>|\"${MACHINE}\"|g' ${D}${du_config}
     sed -i 's|<downloads_folder>|\"${ADUC_DOWNLOADS_DIR}\"|g' ${D}${du_config}
@@ -68,7 +68,7 @@ do_install() {
 }
 
 do_deploy() {
-    local prov_service_dir_name=fs-provisioning
+    local prov_service_dir_name=${FS_PROVISIONING_SERVICE_DIR_NAME}
     local provservice=${WORKDIR}/${prov_service_dir_name}
     install -d ${DEPLOY_DIR_IMAGE}/${prov_service_dir_name}
     cp -rf ${provservice}/* ${DEPLOY_DIR_IMAGE}/${prov_service_dir_name}
