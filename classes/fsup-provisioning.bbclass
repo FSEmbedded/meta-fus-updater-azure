@@ -67,9 +67,13 @@ create_update_manifest_images() {
     local fw_version=${FIRMWARE_VERSION}
     local app_version=${APPLICATION_VERSION}
     local manifest_app_up_version=${MANIFEST_APP_UPDATE_VERSION}
-    local now=$(date '+%Y%m%d%H%M%S')
     local fsup_image_dir_name="${FSUP_IMAGE_DIR_NAME}"
-    local fsup_images_dir=${DEPLOY_DIR_IMAGE}/${fsup_image_dir_name}
+    local fsup_images_dir=${IMGDEPLOYDIR}/${fsup_image_dir_name}
+
+    # Read and write per-image names in IMGDEPLOYDIR: the unprefixed DEPLOY_DIR_IMAGE names
+    # are deployed after this task, so they are missing or stale. Stable names instead of a
+    # timestamp, since IMGDEPLOYDIR is only cleaned by do_rootfs.
+    rm -f ${IMGDEPLOYDIR}/*.importmanifest.json ${fsup_images_dir}/*.importmanifest.json
 
     # create fsupdate images for nand boot device
     if echo "${IMAGE_FSTYPES}" | grep -q "ubifs"; then
@@ -80,8 +84,8 @@ create_update_manifest_images() {
             -c "deviceModel:${manifest_dev_mod}" \
             -h "fus/update:1" \
             -r "installedCriteria:${fw_version}" -r "updateType:firmware" \
-            ${DEPLOY_DIR_IMAGE}/rauc_update_nand.artifact > \
-                ${DEPLOY_DIR_IMAGE}/${manifest_provider}.${manifest_up_name}-fw.${now}.importmanifest.json
+            ${IMGDEPLOYDIR}/${FSUP_ARTIFACT_PREFIX}rauc_update_nand.artifact > \
+                ${IMGDEPLOYDIR}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-fw-nand.importmanifest.json
 
         # create manifest for fs common update
         . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
@@ -90,8 +94,8 @@ create_update_manifest_images() {
             -c "deviceModel:${manifest_dev_mod}" \
             -h "fus/update:1" \
             -r "installedCriteria:${fw_version}" -r "updateType:common-both" \
-            ${fsup_images_dir}/update_nand.fs > \
-                ${fsup_images_dir}/${manifest_provider}.${manifest_up_name}-common-update-nand.${now}.importmanifest.json
+            ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}update_nand.fs > \
+                ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-common-update-nand.importmanifest.json
 
         # create manifest for common firmware package
         . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
@@ -100,8 +104,8 @@ create_update_manifest_images() {
             -c "deviceModel:${manifest_dev_mod}" \
             -h "fus/update:1" \
             -r "installedCriteria:${fw_version}" -r "updateType:common-firmware" \
-            ${fsup_images_dir}/firmware_nand.fs > \
-                ${fsup_images_dir}/${manifest_provider}.${manifest_up_name}-common-fw-nand.${now}.importmanifest.json
+            ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}firmware_nand.fs > \
+                ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-common-fw-nand.importmanifest.json
     fi
 
     # create fsupdate images for emmc boot device
@@ -113,8 +117,8 @@ create_update_manifest_images() {
             -c "deviceModel:${manifest_dev_mod}" \
             -h "fus/update:1" \
             -r "installedCriteria:${fw_version}" -r "updateType:firmware" \
-            ${DEPLOY_DIR_IMAGE}/rauc_update_emmc.artifact > \
-                ${DEPLOY_DIR_IMAGE}/${manifest_provider}.${manifest_up_name}-fw.${now}.importmanifest.json
+            ${IMGDEPLOYDIR}/${FSUP_ARTIFACT_PREFIX}rauc_update_emmc.artifact > \
+                ${IMGDEPLOYDIR}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-fw-emmc.importmanifest.json
 
         # create manifest for fs common update
         . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
@@ -123,8 +127,8 @@ create_update_manifest_images() {
             -c "deviceModel:${manifest_dev_mod}" \
             -h "fus/update:1" \
             -r "installedCriteria:${fw_version}" -r "updateType:common-both" \
-            ${fsup_images_dir}/update_emmc.fs > \
-                ${fsup_images_dir}/${manifest_provider}.${manifest_up_name}-common-update-emmc.${now}.importmanifest.json
+            ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}update_emmc.fs > \
+                ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-common-update-emmc.importmanifest.json
 
         # create manifest for common firmware package
         . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
@@ -133,40 +137,32 @@ create_update_manifest_images() {
             -c "deviceModel:${manifest_dev_mod}" \
             -h "fus/update:1" \
             -r "installedCriteria:${fw_version}" -r "updateType:common-firmware" \
-            ${fsup_images_dir}/firmware_emmc.fs > \
-                ${fsup_images_dir}/${manifest_provider}.${manifest_up_name}-common-fw-emmc.${now}.importmanifest.json
+            ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}firmware_emmc.fs > \
+                ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-common-fw-emmc.importmanifest.json
     fi
 
-    # create manifest for application image
-    . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
-        -n "${manifest_up_name}" -v "${manifest_app_up_version}" \
-        -c "deviceManufacturer:${manifest_provider}" \
-        -c "deviceModel:${manifest_dev_mod}" \
-        -h "fus/update:1" \
-        -r "installedCriteria:${app_version}" -r "updateType:application" \
-        ${DEPLOY_DIR_IMAGE}/${APPLICATION_CONTAINER_NAME} > \
-            ${DEPLOY_DIR_IMAGE}/${manifest_provider}.${manifest_up_name}-app.${now}.importmanifest.json
+    # no application artifact is built in rootfs deploy mode
+    if [ "${FUS_APPLICATION_DEPLOY_MODE}" = "container" ]; then
+        # create manifest for application image
+        . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
+            -n "${manifest_up_name}" -v "${manifest_app_up_version}" \
+            -c "deviceManufacturer:${manifest_provider}" \
+            -c "deviceModel:${manifest_dev_mod}" \
+            -h "fus/update:1" \
+            -r "installedCriteria:${app_version}" -r "updateType:application" \
+            ${IMGDEPLOYDIR}/${FSUP_ARTIFACT_PREFIX}${APPLICATION_CONTAINER_NAME} > \
+                ${IMGDEPLOYDIR}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-app.importmanifest.json
 
-    # create manifest for common application package
-    . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
-        -n "${manifest_up_name}" -v "${manifest_app_up_version}" \
-        -c "deviceManufacturer:${manifest_provider}" \
-        -c "deviceModel:${manifest_dev_mod}" \
-        -h "fus/update:1" \
-        -r "installedCriteria:${app_version}" -r "updateType:common-application" \
-        ${fsup_images_dir}/application.fs > \
-            ${fsup_images_dir}/${manifest_provider}.${manifest_up_name}-common-app.${now}.importmanifest.json
+        # create manifest for common application package
+        . ${iot_du_tools_dir}/create-adu-import-manifest.sh -p "${manifest_provider}" \
+            -n "${manifest_up_name}" -v "${manifest_app_up_version}" \
+            -c "deviceManufacturer:${manifest_provider}" \
+            -c "deviceModel:${manifest_dev_mod}" \
+            -h "fus/update:1" \
+            -r "installedCriteria:${app_version}" -r "updateType:common-application" \
+            ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}application.fs > \
+                ${fsup_images_dir}/${FSUP_ARTIFACT_PREFIX}${manifest_provider}.${manifest_up_name}-common-app.importmanifest.json
+    fi
 }
 
 IMAGE_POSTPROCESS_COMMAND += "create_update_manifest_images create_device_certificate"
-
-# remove all created manifests
-fsup_manifest_clean () {
-    rm -rf ${DEPLOY_DIR_IMAGE}/${MANIFEST_PROVIDER}*
-}
-
-# extend do_clean function to remove all available manifest files
-do_clean:append () {
-    # call fsup_manifest_clean function
-    bb.build.exec_func('fsup_manifest_clean', d)
-}
