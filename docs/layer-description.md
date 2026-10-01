@@ -47,8 +47,6 @@ Provides the Azure device update agent with additional required packages and art
   and deploys it to the */etc* directory.
 - *adu-log-dir* installs a tmpfiles.d rule that creates the *ADUC_LOG_DIR*
   directory for ADU log files at boot.
-- *adu-pub-key* generates and installs the public key
-  .pem file used to validate the signatures of images.
 - *azure-device-update* builds and installs the device update agent and deploys the
   *tools/AduCmdlets* scripts to the *iot_hub_scripts* directory.
 - *deliveryoptimization-agent* builds and installs the
